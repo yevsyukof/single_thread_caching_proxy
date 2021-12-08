@@ -1,0 +1,11 @@
+#ifndef SINGLE_THREAD_PORXY_CACHE_H
+#define SINGLE_THREAD_PORXY_CACHE_H
+
+
+class Cache {
+public:
+
+};
+
+
+#endif //SINGLE_THREAD_PORXY_CACHE_H

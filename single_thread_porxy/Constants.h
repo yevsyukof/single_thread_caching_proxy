@@ -1,0 +1,12 @@
+//
+// Created by yevsyukof on 09.12.2021.
+//
+
+#ifndef SINGLE_THREAD_PORXY_CONSTANTS_H
+#define SINGLE_THREAD_PORXY_CONSTANTS_H
+
+constexpr static int CONNECTION_CHECK_DELAY = 10000;
+
+constexpr static int MAX_CONNECTION_NUM = SOMAXCONN;
+
+#endif //SINGLE_THREAD_PORXY_CONSTANTS_H

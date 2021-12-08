@@ -1,0 +1,3 @@
+/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles/single_thread_porxy.dir
