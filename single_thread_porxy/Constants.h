@@ -13,7 +13,9 @@ constexpr static int IGNORED_SOCKET_FD_VAL = -1; // игнорируется poo
 
 static const std::string ERROR_MESSAGE_405 = "HTTP/1.0 405 Method Not Allowed\r\nAllow: GET, HEAD\r\n\r\n";
 
-static const std::string ERROR_MESSAGE_501 = "HTTP/1.0 501 Not Implemented\r\n\r\nAllow: GET, HEAD\r\n\r\n";
+static const std::string ERROR_MESSAGE_500 = "HTTP/1.0 500 Internal Server Error\r\n\r\n";
+
+static const std::string ERROR_MESSAGE_501 = "HTTP/1.0 501 Not Implemented\r\nAllow: GET, HEAD\r\n\r\n";
 
 static const std::string ERROR_MESSAGE_505 = "HTTP/1.0 505 HTTP Version not supported\r\n\r\n";
 

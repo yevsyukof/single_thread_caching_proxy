@@ -2,10 +2,11 @@
 #include "ClientConnection.h"
 #include "../HttpParser/HttpRequest.h"
 
+#define RECV_BUF_SIZE 16536
 
 ClientConnection::ClientConnection(int connectionSocketFd, int inPollListIdx)
         : Connection(connectionSocketFd, inPollListIdx),
-          connectionState(ClientConnectionState::WAIT_FOR_REQUEST) {}
+          connectionState(ClientConnectionStates::WAIT_FOR_REQUEST) {}
 
 
 HttpRequest parseHttpRequest(std::vector<char> &request, std::string &newRequest) {
@@ -57,6 +58,25 @@ HttpRequest parseHttpRequest(std::vector<char> &request, std::string &newRequest
     return buildingHttpRequest;
 }
 
-int ClientConnection::receiveData() {
-    return 0;
+ssize_t ClientConnection::receiveData() {
+    char buf[RECV_BUF_SIZE];
+    ssize_t recvCount;
+    if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) < 0) {
+        connectionState = ClientConnectionStates::ERROR;
+        errorState = ClientConnectionErrors::ERROR_500;
+        perror("RECEIVE FROM CLIENT SOCKET ERROR\n");
+    }
+
+    if (recvCount >= 0) {
+        recvRequestBuf.insert(recvRequestBuf.end(), buf, buf + recvCount);
+        if (recvRequestBuf[recvRequestBuf.size() - 4] == '\r'
+            && recvRequestBuf[recvRequestBuf.size() - 3] == '\n'
+            && recvRequestBuf[recvRequestBuf.size() - 2] == '\r'
+            && recvRequestBuf[recvRequestBuf.size() - 1] == '\n') {
+            connectionState = ClientConnectionStates::WAIT_FOR_ANSWER;
+        } else {
+            connectionState = ClientConnectionStates::PROCESS_REQUEST;
+        }
+    }
+    return recvCount;
 }

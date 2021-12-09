@@ -38,6 +38,8 @@ private:
 
     void updateClientsConnections();
 
+    bool checkClientConnectionForErrors(ClientConnection &clientConnection);
+
     void handleArrivalOfClientRequest(ClientConnection &clientConnection);
 
     void handleArrivalOfServerResponse(ClientConnection &clientConnection);
@@ -55,7 +57,7 @@ private:
     std::vector<ClientConnection> clientsConnections;
     std::vector<ServerConnection> serversConnections;
 
-    std::map<ServerConnection, std::set<ClientConnection>> clientsWaitingForResponse;
+    std::map<std::string, std::set<ClientConnection>> clientsWaitingForResponse; // url -> clients
 
     Cache cacheStorage;
 };

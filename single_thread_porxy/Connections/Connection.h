@@ -3,11 +3,18 @@
 
 #include <vector>
 #include <string>
+#include <unistd.h>
 
 class Connection {
 public:
     Connection(int connectionSocketFd, int inPollListIdx) : connectionSocketFd(connectionSocketFd),
                                                             inPollListIdx(inPollListIdx) {};
+
+    int close() {
+        ::close(connectionSocketFd);
+    }
+
+
 
     int getInPollListIdx() const {
         return inPollListIdx;
@@ -19,7 +26,7 @@ protected:
 
     std::string requestUrl;
 
-    std::vector<char> receiveDataBuf;
+    std::vector<char> recvRequestBuf;
 };
 
 #endif //SINGLE_THREAD_PORXY_CONNECTION_H

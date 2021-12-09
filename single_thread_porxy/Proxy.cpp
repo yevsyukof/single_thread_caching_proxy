@@ -70,7 +70,7 @@ void Proxy::acceptNewConnection() {
 
     std::cout << "NEW CONNECTION: " << acceptedSockFd << std::endl;
 
-    if(acceptedSockFd < 0) {
+    if (acceptedSockFd < 0) {
         perror("Error accepting connection");
         return;
     }
@@ -108,12 +108,39 @@ bool Proxy::isReadyToReceive(Connection &connection) {
     return pollList[connection.getInPollListIdx()].revents & POLLIN; // >0 == true
 }
 
-void Proxy::updateClientsConnections() {
-    for (auto &clientConnection : clientsConnections) {
-        if (pollList[clientConnection.getInPollListIdx()].revents & POLLIN) { // можем принять данные из клиентск.
-            clientConnection.receiveData();
-        }
+bool Proxy::checkClientConnectionForErrors(ClientConnection &clientConnection) {
+    if (pollList[clientConnection.getInPollListIdx()].revents & POLLHUP) {
+        clientConnection.setState(ClientConnectionStates::TERMINATED,
+                                  ClientConnectionErrors::WITHOUT_ERRORS);
+    } else if (pollList[clientConnection.getInPollListIdx()].revents & POLLERR ||
+               pollList[clientConnection.getInPollListIdx()].revents & POLLNVAL) {
+        clientConnection.setState(ClientConnectionStates::ERROR,
+                                  ClientConnectionErrors::ERROR_500);
+    } else {
+        return false;
     }
+    return true;
+}
+
+void Proxy::updateClientsConnections() {
+    for (auto iterator = clientsConnections.begin(); iterator != clientsConnections.end(); ++iterator) {
+        ClientConnection &clientConnection = *iterator;
+
+        if (pollList[clientConnection.getInPollListIdx()].revents & POLLIN) { // можем принять данные из клиентск.
+
+        }
+
+        pollList[clientConnection.getInPollListIdx()].revents = 0;
+    }
+
+
+//    for (auto &clientConnection : clientsConnections) {
+//        if (pollList[clientConnection.getInPollListIdx()].revents & POLLIN) { // можем принять данные из клиентск.
+//
+//        }
+//
+//        pollList[clientConnection.getInPollListIdx()].revents = 0;
+//    }
 }
 
 

@@ -3,29 +3,44 @@
 
 #include <vector>
 #include "Connection.h"
+#include "sys/socket.h"
 
 
-enum class ClientConnectionState {
+enum class ClientConnectionStates {
+    TERMINATED, // соединение прервано
     ERROR, // ошибка с соединением
     WAIT_FOR_REQUEST, // соединение еще ничего не прислало
-    PROCESS_REQUEST, // соединение в процессе передачи запроса
+    PROCESS_REQUEST, // соединение в процессе получения запроса
     WAIT_FOR_ANSWER, // запрос от клиента получен, идет его обработка
     RECEIVING_ANSWER // передача ответа клиенту
+};
+
+enum class ClientConnectionErrors {
+    WITHOUT_ERRORS,
+    ERROR_405,
+    ERROR_500,
+    ERROR_501,
+    ERROR_505
 };
 
 class ClientConnection : public Connection {
 public:
     ClientConnection(int connectionSocketFd, int inPollListIdx);
 
-    int receiveData();
+    ssize_t receiveData();
 
-//    ClientConnectionState getState() const {
-//        return connectionState;
-//    }
+    ClientConnectionStates getState() const {
+        return connectionState;
+    }
+
+    void setState(ClientConnectionStates state, ClientConnectionErrors error) {
+        connectionState = state;
+        errorState = error;
+    }
 
 private:
-    ClientConnectionState connectionState;
-
+    ClientConnectionStates connectionState;
+    ClientConnectionErrors errorState;
 };
 
 
