@@ -3,8 +3,15 @@
 
 #include "Connection.h"
 
-class ServerConnection : Connection {
+enum class ServerConnectionState {
+    REQUEST_DONE,
+    PROCESS_REQUEST,
+    ERROR
+};
 
+class ServerConnection : public Connection {
+public:
+    ServerConnection(int connectionSocketFd, int inPollListIdx);
 };
 
 

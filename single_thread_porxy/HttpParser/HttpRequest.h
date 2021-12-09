@@ -4,9 +4,9 @@
 #include "HttpParser.h"
 
 struct HttpRequest {
-    int version;
+//    int version;
     std::string method;
-    std::string path;
+    std::string url;
     phr_header headers[100];
     size_t headersCount;
     std::string host;

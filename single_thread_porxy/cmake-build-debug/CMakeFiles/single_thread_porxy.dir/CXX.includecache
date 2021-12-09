@@ -6,15 +6,35 @@
 
 #IncludeRegexTransform: 
 
+/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
+map
+-
+string
+-
+CacheEntry.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/CacheEntry.h
+
+/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/CacheEntry.h
+
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.cpp
+string
+-
 ClientConnection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
+../HttpParser/HttpRequest.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpRequest.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
+vector
+-
 Connection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
+vector
+-
+string
+-
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.cpp
 ServerConnection.h
@@ -25,6 +45,14 @@ Connection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Constants.h
+
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.h
+sys/types.h
+-
+
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpRequest.h
+HttpParser.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.cpp
 poll.h
@@ -47,12 +75,18 @@ queue
 -
 memory
 -
+vector
+-
 sys/socket.h
 -
-Connections/Connection.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
 Constants.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Constants.h
+Cache/Cache.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
+Connections/ClientConnection.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
+Connections/ServerConnection.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/main.cpp
 iostream
