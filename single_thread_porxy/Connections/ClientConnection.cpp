@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 #include "ClientConnection.h"
 
 #define RECV_BUF_SIZE 16536
@@ -8,7 +9,7 @@ ClientConnection::ClientConnection(int connectionSocketFd, int inPollListIdx)
           connectionState(ClientConnectionStates::WAIT_FOR_REQUEST) {}
 
 
-void ClientConnection::parseHttpRequest() {
+void ClientConnection::parseHttpRequestAndUpdateState() {
     const char *path;
     const char *method;
     int http_version_minor; // 1.<minor>
@@ -19,14 +20,14 @@ void ClientConnection::parseHttpRequest() {
                                     &clientHttpRequest.headersCount, 0);
 
     if (reqSize <= -1) {
-        perror("BAD HTTP REQUEST\n");
+        std::cerr << "BAD HTTP REQUEST\n";
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_501;
         return;
     }
 
     if (http_version_minor != 0) {
-        perror("WRONG HTTP VERSION");
+        std::cerr << "WRONG HTTP VERSION\n";
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_505;
         return;
@@ -41,7 +42,7 @@ void ClientConnection::parseHttpRequest() {
     clientHttpRequest.method = onlyMethod;
 
     if (clientHttpRequest.method != "GET" && clientHttpRequest.method != "HEAD") {
-        perror("NOT IMPLEMENTED HTTP METHOD");
+        std::cerr << "NOT IMPLEMENTED HTTP METHOD\n";
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_405;
         return;
@@ -66,7 +67,7 @@ void ClientConnection::parseHttpRequest() {
     }
 
     if (clientHttpRequest.host.empty()) {
-        perror("HASN'T HOST");
+        std::cerr << "HASN'T HOST\n";
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_400;
         return;
@@ -85,7 +86,7 @@ int ClientConnection::receiveRequest() {
 
     if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) < 0) {
         connectionState = ClientConnectionStates::CONNECTION_ERROR;
-        perror("RECEIVE FROM CLIENT SOCKET ERROR\n");
+        std::cerr << "RECEIVE FROM CLIENT SOCKET ERROR\n";
         return SOCKET_RECEIVE_ERROR;
     } else {
         recvRequestBuf.insert(recvRequestBuf.end(), buf, buf + recvCount);
@@ -93,7 +94,7 @@ int ClientConnection::receiveRequest() {
             && recvRequestBuf[recvRequestBuf.size() - 3] == '\n'
             && recvRequestBuf[recvRequestBuf.size() - 2] == '\r'
             && recvRequestBuf[recvRequestBuf.size() - 1] == '\n') {
-            parseHttpRequest();
+            parseHttpRequestAndUpdateState();
             return FULL_RECEIVE_REQUEST;
         } else {
             connectionState = ClientConnectionStates::RECEIVE_REQUEST;
@@ -102,8 +103,25 @@ int ClientConnection::receiveRequest() {
     }
 }
 
-int ClientConnection::sendAnswer() {
-    return 0; // TODO
+int ClientConnection::sendAnswer() { // TODO
+    int sendCount;
+    if ((sendCount = send(connectionSocketFd,
+                          sendAnswerBuf->data() + sendAnswerOffset,
+                          sendAnswerBuf->size() - sendAnswerOffset, 0)) == -1) {
+        std::cerr << "CLIENT SEND ANSWER ERROR\n";
+    }
+
+    if (sendCount >= 0) {
+        sendAnswerOffset += sendCount;
+        if (sendAnswerOffset == sendAnswerBuf->size()) {
+            connectionState = ClientConnectionStates::ANSWER_RECEIVED;
+            return FULL_SEND_ANSWER;
+        } else {
+            return NOT_FULL_SEND_ANSWER;
+        }
+    } else {
+        return SOCKET_SEND_ERROR;
+    }
 }
 
 void ClientConnection::initializeAnswerSending(const std::string &errorMessage) {

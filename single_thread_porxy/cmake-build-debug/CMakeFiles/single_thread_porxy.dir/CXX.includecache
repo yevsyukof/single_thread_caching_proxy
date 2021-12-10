@@ -6,10 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.cpp
-Cache.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
-
 /home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
 map
 -
@@ -25,12 +21,6 @@ vector
 -
 memory
 -
-
-/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.cpp
-string
--
-ClientConnection.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 vector
@@ -105,18 +95,4 @@ Connections/ClientConnection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 Connections/ServerConnection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
-
-/home/yevsyukof/CLionProjects/single_thread_porxy/main.cpp
-iostream
--
-csignal
--
-memory.h
--
-sys/poll.h
--
-Proxy.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.h
-HttpParser/HttpRequest.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpRequest.h
 

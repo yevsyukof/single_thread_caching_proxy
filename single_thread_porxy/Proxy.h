@@ -41,11 +41,20 @@ private:
 
     void updateClientsConnections();
 
-    void handleClientSocketError(std::shared_ptr<ClientConnection> &clientConnection);
+    void shutdownClientConnection(const std::shared_ptr<ClientConnection> &clientConnection);
 
-    void handleArrivalOfClientRequest(std::shared_ptr<ClientConnection> &clientConnection);
+    void initializeResponseTransmitting(const std::shared_ptr<ClientConnection> &clientConnection,
+                                        const std::string &errorMessage);
 
-    void handleArrivalOfServerResponse(std::shared_ptr<ClientConnection> &clientConnection);
+    void initializeResponseTransmitting(const std::shared_ptr<ClientConnection> &clientConnection,
+                                        const std::shared_ptr<std::vector<char>> &notCachingAnswer);
+
+    void initializeResponseTransmitting(const std::shared_ptr<ClientConnection> &clientConnection,
+                                        const CacheEntry &cacheEntry);
+
+    void handleArrivalOfClientRequest(const std::shared_ptr<ClientConnection> &clientConnection);
+
+    void handleArrivalOfServerResponse(const std::shared_ptr<ClientConnection> &clientConnection);
 
 private:
     bool isInterrupt;
@@ -64,6 +73,5 @@ private:
 
     Cache cacheStorage;
 };
-
 
 #endif //SINGLE_THREAD_PORXY_PROXY_H

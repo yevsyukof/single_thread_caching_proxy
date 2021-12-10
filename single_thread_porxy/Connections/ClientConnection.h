@@ -12,14 +12,19 @@
 #define FULL_RECEIVE_REQUEST 1
 #define SOCKET_RECEIVE_ERROR -1
 
+#define NOT_FULL_SEND_ANSWER NOT_FULL_RECEIVE_REQUEST
+#define FULL_SEND_ANSWER FULL_RECEIVE_REQUEST
+#define SOCKET_SEND_ERROR SOCKET_RECEIVE_ERROR
+
 enum class ClientConnectionStates {
-//    TERMINATED, // соединение прервано
     CONNECTION_ERROR, // ошибка с соединением
     WRONG_REQUEST, // полученный реквест не валиден
     WAIT_FOR_REQUEST, // соединение еще ничего не прислало
     RECEIVE_REQUEST, // соединение в процессе получения запроса
-    PROCESS_REQUEST, // запрос от клиента получен, распарсен и валиден
-    RECEIVING_ANSWER // передача ответа клиенту
+    PROCESS_REQUEST, // запрос клиента обрабатывается прокси-сервером
+    WAIT_FOR_RESPONSE, // запрос клиента передан на вышестоящий сервер
+    RECEIVING_ANSWER, // клиент получает ответ
+    ANSWER_RECEIVED // ответ передан, соединение отработано
 };
 
 enum class ClientRequestErrors {
@@ -64,7 +69,7 @@ public:
     }
 
 private:
-    void parseHttpRequest();
+    void parseHttpRequestAndUpdateState();
 
 private:
     ClientConnectionStates connectionState;

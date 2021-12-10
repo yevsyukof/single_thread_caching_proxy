@@ -71,7 +71,7 @@ void Proxy::acceptNewConnection() {
     std::cout << "NEW CONNECTION: " << acceptedSockFd << std::endl;
 
     if (acceptedSockFd < 0) {
-        perror("Error accepting connection");
+        std::cerr << "Error accepting connection\n";
         return;
     }
 
@@ -81,10 +81,9 @@ void Proxy::acceptNewConnection() {
 }
 
 void Proxy::run() {
-    int pollStatus;
     while (!isInterrupt) {
-        if ((pollStatus = poll(pollList, MAX_CONNECTION_NUM, 0)) == -1) {
-            std::cerr << "POLL WRONG_REQUEST. Errno = " << errno << std::endl;
+        if (poll(pollList, MAX_CONNECTION_NUM, -1) == -1) {
+            std::cerr << "Proxy.run(): POLL ERROR. Errno = " << errno << std::endl;
             continue;
         }
 
@@ -118,25 +117,15 @@ bool Proxy::checkConnectionSocketForErrors(int connectionIdxInPollList) {
     return false;
 }
 
-void Proxy::handleClientSocketError(std::shared_ptr<ClientConnection> &clientConnection) {
+void Proxy::shutdownClientConnection(const std::shared_ptr<ClientConnection> &clientConnection) {
     switch (clientConnection->getState()) {
-        case ClientConnectionStates::WAIT_FOR_REQUEST : {
-            break;
-        }
-        case ClientConnectionStates::RECEIVE_REQUEST : {
-            break;
-        }
-        case ClientConnectionStates::PROCESS_REQUEST : {
+        case ClientConnectionStates::WAIT_FOR_RESPONSE : {
             clientsWaitingForResponse[clientConnection->getRequestUrl()].erase(clientConnection);
             break;
         }
-        case ClientConnectionStates::RECEIVING_ANSWER : {
-            clientsWaitingForResponse[clientConnection->getRequestUrl()].erase(clientConnection);
+        default : {
+            break;
         }
-        case ClientConnectionStates::CONNECTION_ERROR:
-            break;
-        case ClientConnectionStates::WRONG_REQUEST:
-            break;
     }
     removeConnectionFdFromPollList(clientConnection->getInPollListIdx());
     clientConnection->close();
@@ -147,8 +136,8 @@ void Proxy::updateClientsConnections() {
         std::shared_ptr<ClientConnection> &clientConnection = *iterator;
 
         if (checkConnectionSocketForErrors(clientConnection->getInPollListIdx())) {
-            handleClientSocketError(clientConnection);
-            clientsConnections.erase(iterator); // TODO правильный ли будет итератор на след итерации
+            shutdownClientConnection(clientConnection);
+            iterator = clientsConnections.erase(iterator); // TODO правильный ли будет итератор на след итерации
             continue;
         }
 
@@ -157,75 +146,91 @@ void Proxy::updateClientsConnections() {
                 if (clientConnection->getState() != ClientConnectionStates::CONNECTION_ERROR) {
                     handleArrivalOfClientRequest(clientConnection);
                 } else {
-                    handleClientSocketError(clientConnection);
-                    clientsConnections.erase(iterator);
+                    shutdownClientConnection(clientConnection);
+                    iterator = clientsConnections.erase(iterator);
                     continue;
                 }
             }
         } else if (isReadyToSend(clientConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
             if (clientConnection->sendAnswer()) {
-                if (clientConnection->getState() == ClientConnectionStates::CONNECTION_ERROR) {
-                    handleClientSocketError(clientConnection);
-                    clientsConnections.erase(iterator);
-                    continue;
-                }
-                // TODO
+                shutdownClientConnection(clientConnection);
+                iterator = clientsConnections.erase(iterator);
+                continue;
             }
         }
 
-        pollList[clientConnection->getInPollListIdx()].revents = 0; // нужно ли? da
+        pollList[clientConnection->getInPollListIdx()].revents = 0;
     }
 }
 
 
-void Proxy::handleArrivalOfClientRequest(std::shared_ptr<ClientConnection> &clientConnection) {
+void Proxy::handleArrivalOfClientRequest(const std::shared_ptr<ClientConnection> &clientConnection) {
     if (clientConnection->getState() == ClientConnectionStates::WRONG_REQUEST) {
         switch (clientConnection->getError()) {
             case ClientRequestErrors::ERROR_400: {
-                clientConnection->initializeAnswerSending(ERROR_MESSAGE_400);
+                initializeResponseTransmitting(clientConnection, ERROR_MESSAGE_400);
                 break;
             }
             case ClientRequestErrors::ERROR_405: {
-                clientConnection->initializeAnswerSending(ERROR_MESSAGE_405);
+                initializeResponseTransmitting(clientConnection, ERROR_MESSAGE_405);
                 break;
             }
             case ClientRequestErrors::ERROR_500: {
-                clientConnection->initializeAnswerSending(ERROR_MESSAGE_500);
+                initializeResponseTransmitting(clientConnection, ERROR_MESSAGE_500);
                 break;
             }
             case ClientRequestErrors::ERROR_501: {
-                clientConnection->initializeAnswerSending(ERROR_MESSAGE_501);
+                initializeResponseTransmitting(clientConnection, ERROR_MESSAGE_501);
                 break;
             }
             case ClientRequestErrors::ERROR_504: {
-                clientConnection->initializeAnswerSending(ERROR_MESSAGE_504);
+                initializeResponseTransmitting(clientConnection, ERROR_MESSAGE_504);
                 break;
             }
             case ClientRequestErrors::ERROR_505: {
-                clientConnection->initializeAnswerSending(ERROR_MESSAGE_505);
+                initializeResponseTransmitting(clientConnection, ERROR_MESSAGE_505);
                 break;
             }
             case ClientRequestErrors::WITHOUT_ERRORS: {
                 throw std::invalid_argument("Недопустимое состояние клиентского соединения");
             }
         }
-        pollList[clientConnection->getInPollListIdx()].events = POLLOUT;
     } else {
         if (cacheStorage.contains(clientConnection->getRequestUrl())) { /// запись есть
-            clientConnection->initializeAnswerSending(
-                    cacheStorage.getCacheEntry(clientConnection->getRequestUrl()));
-            pollList[clientConnection->getInPollListIdx()].events = POLLOUT;
+            initializeResponseTransmitting(clientConnection,
+                                           cacheStorage.getCacheEntry(clientConnection->getRequestUrl()));
         } else if (clientsWaitingForResponse.find(clientConnection->getRequestUrl()) !=
                    clientsWaitingForResponse.end()) { /// запись качают другие
             clientsWaitingForResponse[clientConnection->getRequestUrl()].insert(clientConnection);
-            pollList[clientConnection->getInPollListIdx()].events = 0;
+            pollList[clientConnection->getInPollListIdx()].events = 0; // клиента разбудит обработчик прибытия ответа
         } else { /// записи нет
             // TODO создать новое соединение с сервером
+
         }
     }
+}
+
+void Proxy::handleArrivalOfServerResponse(const std::shared_ptr<ClientConnection> &clientConnection) {
+
+}
+
+void Proxy::initializeResponseTransmitting(const std::shared_ptr<ClientConnection> &clientConnection,
+                                           const std::string &errorMessage) {
+    clientConnection->initializeAnswerSending(errorMessage);
+    pollList[clientConnection->getInPollListIdx()].events = POLLOUT;
     clientConnection->setState(ClientConnectionStates::RECEIVING_ANSWER);
 }
 
-void Proxy::handleArrivalOfServerResponse(std::shared_ptr<ClientConnection> &clientConnection) {
+void Proxy::initializeResponseTransmitting(const std::shared_ptr<ClientConnection> &clientConnection,
+                                           const std::shared_ptr<std::vector<char>> &notCachingAnswer) {
+    clientConnection->initializeAnswerSending(notCachingAnswer);
+    pollList[clientConnection->getInPollListIdx()].events = POLLOUT;
+    clientConnection->setState(ClientConnectionStates::RECEIVING_ANSWER);
+}
 
+void Proxy::initializeResponseTransmitting(const std::shared_ptr<ClientConnection> &clientConnection,
+                                           const CacheEntry &cacheEntry) {
+    clientConnection->initializeAnswerSending(cacheEntry);
+    pollList[clientConnection->getInPollListIdx()].events = POLLOUT;
+    clientConnection->setState(ClientConnectionStates::RECEIVING_ANSWER);
 }

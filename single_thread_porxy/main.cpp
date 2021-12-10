@@ -29,7 +29,7 @@ void set_sig_handler() {
 
 
 int main() {
-//    set_sig_handler();
-//    cachingProxy = Proxy(LISTENING_PORT);
-//    cachingProxy.run();
+    set_sig_handler();
+    cachingProxy = Proxy(LISTENING_PORT);
+    cachingProxy.run();
 }
