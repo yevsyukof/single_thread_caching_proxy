@@ -33,9 +33,9 @@ private:
 
     void removeConnectionFdFromPollList(int connectionIdxInPollList);
 
-    bool isReadyToSend(int connectionIdxInPollList);
+    int isReadyToSend(int connectionIdxInPollList);
 
-    bool isReadyToReceive(int connectionIdxInPollList);
+    int isReadyToReceive(int connectionIdxInPollList);
 
     bool checkConnectionSocketForErrors(int connectionIdxInPollList);
 

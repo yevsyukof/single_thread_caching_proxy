@@ -18,7 +18,7 @@ public:
         return inPollListIdx;
     }
 
-    std::string getRequestUrl() const {
+    const std::string& getRequestUrl() const {
         return requestUrl;
     }
 

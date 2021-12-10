@@ -75,6 +75,7 @@ void Proxy::acceptNewConnection() {
         return;
     }
 
+    /// ошибки не обязательно ставить в events, они все равно появлятся в revents
     int inPollListIdx = addConnectionFdInPollList(acceptedSockFd, POLLIN);
     clientsConnections.emplace_back(std::make_shared<ClientConnection>(acceptedSockFd, inPollListIdx));
 }
@@ -100,12 +101,12 @@ void Proxy::shutdown() {
     isInterrupt = true;
 }
 
-bool Proxy::isReadyToSend(int connectionIdxInPollList) {
-    return (pollList[connectionIdxInPollList].revents & POLLOUT) == POLLOUT;
+int Proxy::isReadyToSend(int connectionIdxInPollList) {
+    return pollList[connectionIdxInPollList].revents & POLLOUT;
 }
 
-bool Proxy::isReadyToReceive(int connectionIdxInPollList) {
-    return (pollList[connectionIdxInPollList].revents & POLLIN) == POLLIN;
+int Proxy::isReadyToReceive(int connectionIdxInPollList) {
+    return pollList[connectionIdxInPollList].revents & POLLIN;
 }
 
 bool Proxy::checkConnectionSocketForErrors(int connectionIdxInPollList) {
@@ -122,16 +123,20 @@ void Proxy::handleClientSocketError(std::shared_ptr<ClientConnection> &clientCon
         case ClientConnectionStates::WAIT_FOR_REQUEST : {
             break;
         }
-        case ClientConnectionStates::PROCESS_REQUEST : {
+        case ClientConnectionStates::RECEIVE_REQUEST : {
             break;
         }
-        case ClientConnectionStates::WAIT_FOR_ANSWER : {
+        case ClientConnectionStates::PROCESS_REQUEST : {
             clientsWaitingForResponse[clientConnection->getRequestUrl()].erase(clientConnection);
             break;
         }
         case ClientConnectionStates::RECEIVING_ANSWER : {
             clientsWaitingForResponse[clientConnection->getRequestUrl()].erase(clientConnection);
         }
+        case ClientConnectionStates::CONNECTION_ERROR:
+            break;
+        case ClientConnectionStates::WRONG_REQUEST:
+            break;
     }
     removeConnectionFdFromPollList(clientConnection->getInPollListIdx());
     clientConnection->close();
@@ -157,23 +162,68 @@ void Proxy::updateClientsConnections() {
                     continue;
                 }
             }
+        } else if (isReadyToSend(clientConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
+            if (clientConnection->sendAnswer()) {
+                if (clientConnection->getState() == ClientConnectionStates::CONNECTION_ERROR) {
+                    handleClientSocketError(clientConnection);
+                    clientsConnections.erase(iterator);
+                    continue;
+                }
+                // TODO
+            }
         }
 
-        if (isReadyToSend(clientConnection->getInPollListIdx())) {
-            // TODO
-        }
-
-        pollList[clientConnection->getInPollListIdx()].revents = 0; // нужно ли?
+        pollList[clientConnection->getInPollListIdx()].revents = 0; // нужно ли? da
     }
 }
 
 
 void Proxy::handleArrivalOfClientRequest(std::shared_ptr<ClientConnection> &clientConnection) {
     if (clientConnection->getState() == ClientConnectionStates::WRONG_REQUEST) {
-        //
+        switch (clientConnection->getError()) {
+            case ClientRequestErrors::ERROR_400: {
+                clientConnection->initializeAnswerSending(ERROR_MESSAGE_400);
+                break;
+            }
+            case ClientRequestErrors::ERROR_405: {
+                clientConnection->initializeAnswerSending(ERROR_MESSAGE_405);
+                break;
+            }
+            case ClientRequestErrors::ERROR_500: {
+                clientConnection->initializeAnswerSending(ERROR_MESSAGE_500);
+                break;
+            }
+            case ClientRequestErrors::ERROR_501: {
+                clientConnection->initializeAnswerSending(ERROR_MESSAGE_501);
+                break;
+            }
+            case ClientRequestErrors::ERROR_504: {
+                clientConnection->initializeAnswerSending(ERROR_MESSAGE_504);
+                break;
+            }
+            case ClientRequestErrors::ERROR_505: {
+                clientConnection->initializeAnswerSending(ERROR_MESSAGE_505);
+                break;
+            }
+            case ClientRequestErrors::WITHOUT_ERRORS: {
+                throw std::invalid_argument("Недопустимое состояние клиентского соединения");
+            }
+        }
+        pollList[clientConnection->getInPollListIdx()].events = POLLOUT;
     } else {
-        // 3 случая кэша?
+        if (cacheStorage.contains(clientConnection->getRequestUrl())) { /// запись есть
+            clientConnection->initializeAnswerSending(
+                    cacheStorage.getCacheEntry(clientConnection->getRequestUrl()));
+            pollList[clientConnection->getInPollListIdx()].events = POLLOUT;
+        } else if (clientsWaitingForResponse.find(clientConnection->getRequestUrl()) !=
+                   clientsWaitingForResponse.end()) { /// запись качают другие
+            clientsWaitingForResponse[clientConnection->getRequestUrl()].insert(clientConnection);
+            pollList[clientConnection->getInPollListIdx()].events = 0;
+        } else { /// записи нет
+            // TODO создать новое соединение с сервером
+        }
     }
+    clientConnection->setState(ClientConnectionStates::RECEIVING_ANSWER);
 }
 
 void Proxy::handleArrivalOfServerResponse(std::shared_ptr<ClientConnection> &clientConnection) {

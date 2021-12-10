@@ -1,6 +1,5 @@
 file(REMOVE_RECURSE
   "CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o"
-  "CMakeFiles/single_thread_porxy.dir/Cache/CacheEntry.cpp.o"
   "CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o"
   "CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o"
   "CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o"

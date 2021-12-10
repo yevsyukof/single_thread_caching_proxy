@@ -8,10 +8,8 @@ CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o: \
  ../Cache/Cache.cpp \
  ../Cache/Cache.h \
  ../Cache/CacheEntry.h
-CMakeFiles/single_thread_porxy.dir/Cache/CacheEntry.cpp.o: \
- ../Cache/CacheEntry.cpp \
- ../Cache/CacheEntry.h
 CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o: \
+ ../Cache/CacheEntry.h \
  ../Connections/ClientConnection.cpp \
  ../Connections/ClientConnection.h \
  ../Connections/Connection.h \
@@ -28,6 +26,8 @@ CMakeFiles/single_thread_porxy.dir/Proxy.cpp.o: \
  ../Connections/Connection.h \
  ../Connections/ServerConnection.h \
  ../Constants.h \
+ ../HttpParser/HttpParser.h \
+ ../HttpParser/HttpRequest.h \
  ../Proxy.cpp \
  ../Proxy.h
 CMakeFiles/single_thread_porxy.dir/main.cpp.o: \

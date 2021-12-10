@@ -153,30 +153,6 @@ Cache/Cache.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.s
 .PHONY : Cache/Cache.cpp.s
 
-Cache/CacheEntry.o: Cache/CacheEntry.cpp.o
-.PHONY : Cache/CacheEntry.o
-
-# target to build an object file
-Cache/CacheEntry.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/Cache/CacheEntry.cpp.o
-.PHONY : Cache/CacheEntry.cpp.o
-
-Cache/CacheEntry.i: Cache/CacheEntry.cpp.i
-.PHONY : Cache/CacheEntry.i
-
-# target to preprocess a source file
-Cache/CacheEntry.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/Cache/CacheEntry.cpp.i
-.PHONY : Cache/CacheEntry.cpp.i
-
-Cache/CacheEntry.s: Cache/CacheEntry.cpp.s
-.PHONY : Cache/CacheEntry.s
-
-# target to generate assembly for a file
-Cache/CacheEntry.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/Cache/CacheEntry.cpp.s
-.PHONY : Cache/CacheEntry.cpp.s
-
 Connections/ClientConnection.o: Connections/ClientConnection.cpp.o
 .PHONY : Connections/ClientConnection.o
 
@@ -309,9 +285,6 @@ help:
 	@echo "... Cache/Cache.o"
 	@echo "... Cache/Cache.i"
 	@echo "... Cache/Cache.s"
-	@echo "... Cache/CacheEntry.o"
-	@echo "... Cache/CacheEntry.i"
-	@echo "... Cache/CacheEntry.s"
 	@echo "... Connections/ClientConnection.o"
 	@echo "... Connections/ClientConnection.i"
 	@echo "... Connections/ClientConnection.s"

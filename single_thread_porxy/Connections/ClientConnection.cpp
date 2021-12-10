@@ -47,7 +47,7 @@ void ClientConnection::parseHttpRequest() {
         return;
     }
 
-    processedRequest = onlyMethod + std::string(" ").append(onlyPath).append(" HTTP/1.0") + "\r\n";
+    processedRequestForServer = onlyMethod + std::string(" ").append(onlyPath).append(" HTTP/1.0") + "\r\n";
 
     for (int i = 0; i < clientHttpRequest.headersCount; ++i) {
         std::string headerName = clientHttpRequest.headers[i].name;
@@ -62,28 +62,31 @@ void ClientConnection::parseHttpRequest() {
             clientHttpRequest.host = headerValue;
         }
 
-        processedRequest.append(headerName).append(": ").append(headerValue) += "\r\n";
+        processedRequestForServer.append(headerName).append(": ").append(headerValue) += "\r\n";
     }
 
-    processedRequest += "\r\n\r\n";
-    connectionState = ClientConnectionStates::WAIT_FOR_ANSWER;
+    if (clientHttpRequest.host.empty()) {
+        perror("HASN'T HOST");
+        connectionState = ClientConnectionStates::WRONG_REQUEST;
+        requestValidatorState = ClientRequestErrors::ERROR_400;
+        return;
+    }
+
+    processedRequestForServer += "\r\n\r\n";
+    connectionState = ClientConnectionStates::PROCESS_REQUEST;
     requestValidatorState = ClientRequestErrors::WITHOUT_ERRORS;
+
+    requestUrl = clientHttpRequest.method + " " + clientHttpRequest.url;
 }
 
-/*
- * return:
- * 0 - если запрос не получен до конца
- * 1 - запрос получен и распарсен
- * -1 - ошибка соединения
- * */
 int ClientConnection::receiveRequest() {
     char buf[RECV_BUF_SIZE];
     ssize_t recvCount;
 
     if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) < 0) {
         connectionState = ClientConnectionStates::CONNECTION_ERROR;
-        perror("RECEIVE FROM CLIENT SOCKET WRONG_REQUEST\n");
-        return -1;
+        perror("RECEIVE FROM CLIENT SOCKET ERROR\n");
+        return SOCKET_RECEIVE_ERROR;
     } else {
         recvRequestBuf.insert(recvRequestBuf.end(), buf, buf + recvCount);
         if (recvRequestBuf[recvRequestBuf.size() - 4] == '\r'
@@ -91,10 +94,30 @@ int ClientConnection::receiveRequest() {
             && recvRequestBuf[recvRequestBuf.size() - 2] == '\r'
             && recvRequestBuf[recvRequestBuf.size() - 1] == '\n') {
             parseHttpRequest();
-            return 1;
+            return FULL_RECEIVE_REQUEST;
         } else {
-            connectionState = ClientConnectionStates::PROCESS_REQUEST;
-            return 0;
+            connectionState = ClientConnectionStates::RECEIVE_REQUEST;
+            return NOT_FULL_RECEIVE_REQUEST;
         }
     }
+}
+
+int ClientConnection::sendAnswer() {
+    return 0; // TODO
+}
+
+void ClientConnection::initializeAnswerSending(const std::string &errorMessage) {
+    sendAnswerOffset = 0;
+    sendAnswerBuf = std::make_shared<std::vector<char>>(
+            std::vector<char>(errorMessage.begin(), errorMessage.end()));
+}
+
+void ClientConnection::initializeAnswerSending(const CacheEntry &cacheEntry) {
+    sendAnswerOffset = 0;
+    sendAnswerBuf = cacheEntry.getCacheEntryData();
+}
+
+void ClientConnection::initializeAnswerSending(const std::shared_ptr<std::vector<char>> &notCachingAnswer) {
+    sendAnswerOffset = 0;
+    sendAnswerBuf = notCachingAnswer;
 }

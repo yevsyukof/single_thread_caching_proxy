@@ -88,9 +88,6 @@
 		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h">
 			<Option target="single_thread_porxy"/>
 		</Unit>
-		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/CacheEntry.cpp">
-			<Option target="single_thread_porxy"/>
-		</Unit>
 		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/CacheEntry.h">
 			<Option target="single_thread_porxy"/>
 		</Unit>
