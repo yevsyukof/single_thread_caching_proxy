@@ -33,11 +33,11 @@ private:
 
     void removeConnectionFdFromPollList(int connectionIdxInPollList);
 
-    int isReadyToSend(int connectionIdxInPollList);
+    int isReadyToSend(int connectionIdxInPollList) const;
 
-    int isReadyToReceive(int connectionIdxInPollList);
+    int isReadyToReceive(int connectionIdxInPollList) const;
 
-    bool checkConnectionSocketForErrors(int connectionIdxInPollList);
+    bool checkConnectionSocketForErrors(int connectionIdxInPollList) const;
 
     void updateClientsConnections();
 
@@ -54,7 +54,20 @@ private:
 
     void handleArrivalOfClientRequest(const std::shared_ptr<ClientConnection> &clientConnection);
 
-    void handleArrivalOfServerResponse(const std::shared_ptr<ClientConnection> &clientConnection);
+//    void handleArrivalOfServerResponse(const std::shared_ptr<ClientConnection> &clientConnection);
+
+    int resolveRequiredHost(const std::string &host) const;
+
+    void updateServersConnections();
+
+    void shutdownServerConnection(const std::shared_ptr<ServerConnection> &serverConnection);
+
+    void addClientInWaitersList(const std::shared_ptr<ClientConnection> &clientConnection);
+
+    void initializeNewServerConnection(int newServerConnectionSocketFd,
+                                       const std::string &requestUrl,
+                                       const std::string& processedRequestForServer);
+
 
 private:
     bool isInterrupt;

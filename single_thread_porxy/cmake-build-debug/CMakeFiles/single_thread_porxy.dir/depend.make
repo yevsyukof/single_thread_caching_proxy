@@ -18,7 +18,9 @@ CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o: \
 CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o: \
  ../Connections/Connection.h \
  ../Connections/ServerConnection.cpp \
- ../Connections/ServerConnection.h
+ ../Connections/ServerConnection.h \
+ ../HttpParser/HttpParser.h \
+ ../HttpParser/HttpRequest.h
 CMakeFiles/single_thread_porxy.dir/Proxy.cpp.o: \
  ../Cache/Cache.h \
  ../Cache/CacheEntry.h \

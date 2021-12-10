@@ -3,12 +3,17 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include <unistd.h>
+#include "sys/socket.h"
+#include "../HttpParser/HttpRequest.h"
 
 class Connection {
 public:
     Connection(int connectionSocketFd, int inPollListIdx) : connectionSocketFd(connectionSocketFd),
-                                                            inPollListIdx(inPollListIdx) {};
+                                                            inPollListIdx(inPollListIdx) {
+        this->recvBuf = std::make_shared<std::vector<char>>(std::vector<char>());
+    };
 
     int close() {
         return ::close(connectionSocketFd);
@@ -31,7 +36,7 @@ protected:
     int inPollListIdx;
 
     std::string requestUrl;
-    std::vector<char> recvRequestBuf;
+    std::shared_ptr<std::vector<char>> recvBuf; // TODO поменля это
 };
 
 #endif //SINGLE_THREAD_PORXY_CONNECTION_H
