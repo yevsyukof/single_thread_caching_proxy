@@ -11,13 +11,19 @@ public:
                                                             inPollListIdx(inPollListIdx) {};
 
     int close() {
-        ::close(connectionSocketFd);
+        return ::close(connectionSocketFd);
     }
-
-
 
     int getInPollListIdx() const {
         return inPollListIdx;
+    }
+
+    std::string getRequestUrl() const {
+        return requestUrl;
+    }
+
+    bool operator<(Connection &other) const {
+        return this->connectionSocketFd < other.connectionSocketFd;
     }
 
 protected:
@@ -25,7 +31,6 @@ protected:
     int inPollListIdx;
 
     std::string requestUrl;
-
     std::vector<char> recvRequestBuf;
 };
 

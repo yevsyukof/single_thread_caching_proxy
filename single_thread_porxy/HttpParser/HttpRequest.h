@@ -4,7 +4,7 @@
 #include "HttpParser.h"
 
 struct HttpRequest {
-//    int version;
+    int version;
     std::string method;
     std::string url;
     phr_header headers[100];

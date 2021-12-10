@@ -1,6 +1,5 @@
 #include <string>
 #include "ClientConnection.h"
-#include "../HttpParser/HttpRequest.h"
 
 #define RECV_BUF_SIZE 16536
 
@@ -9,74 +8,93 @@ ClientConnection::ClientConnection(int connectionSocketFd, int inPollListIdx)
           connectionState(ClientConnectionStates::WAIT_FOR_REQUEST) {}
 
 
-HttpRequest parseHttpRequest(std::vector<char> &request, std::string &newRequest) {
-    HttpRequest buildingHttpRequest;
-
+void ClientConnection::parseHttpRequest() {
     const char *path;
     const char *method;
-    int version;
+    int http_version_minor; // 1.<minor>
     size_t methodLen, pathLen;
 
-    buildingHttpRequest.headersCount = sizeof(buildingHttpRequest.headers) / sizeof(buildingHttpRequest.headers[0]);
-    int reqSize = phr_parse_request(request.data(), request.size(), &method, &methodLen,
-                                    &path, &pathLen, &version, buildingHttpRequest.headers,
-                                    &buildingHttpRequest.headersCount, 0);
+    int reqSize = phr_parse_request(recvRequestBuf.data(), recvRequestBuf.size(), &method, &methodLen,
+                                    &path, &pathLen, &http_version_minor, clientHttpRequest.headers,
+                                    &clientHttpRequest.headersCount, 0);
 
-    if (reqSize == -1) {
+    if (reqSize <= -1) {
         perror("BAD HTTP REQUEST\n");
+        connectionState = ClientConnectionStates::WRONG_REQUEST;
+        requestValidatorState = ClientRequestErrors::ERROR_501;
+        return;
+    }
+
+    if (http_version_minor != 0) {
+        perror("WRONG HTTP VERSION");
+        connectionState = ClientConnectionStates::WRONG_REQUEST;
+        requestValidatorState = ClientRequestErrors::ERROR_505;
+        return;
     }
 
     std::string onlyPath = path;
     onlyPath.erase(onlyPath.begin() + pathLen, onlyPath.end());
-    buildingHttpRequest.url = onlyPath;
+    clientHttpRequest.url = onlyPath;
 
     std::string onlyMethod = method;
     onlyMethod.erase(onlyMethod.begin() + methodLen, onlyMethod.end());
-    buildingHttpRequest.method = onlyMethod;
+    clientHttpRequest.method = onlyMethod;
 
-    newRequest = onlyMethod + std::string(" ").append(onlyPath).append(" HTTP/1.0") + "\r\n";
+    if (clientHttpRequest.method != "GET" && clientHttpRequest.method != "HEAD") {
+        perror("NOT IMPLEMENTED HTTP METHOD");
+        connectionState = ClientConnectionStates::WRONG_REQUEST;
+        requestValidatorState = ClientRequestErrors::ERROR_405;
+        return;
+    }
 
+    processedRequest = onlyMethod + std::string(" ").append(onlyPath).append(" HTTP/1.0") + "\r\n";
 
-    for (int i = 0; i < buildingHttpRequest.headersCount; ++i) {
-        std::string headerName = buildingHttpRequest.headers[i].name;
-        headerName.erase(headerName.begin() + buildingHttpRequest.headers[i].name_len, headerName.end());
-        std::string headerValue = buildingHttpRequest.headers[i].value;
-        headerValue.erase(headerValue.begin() + buildingHttpRequest.headers[i].value_len, headerValue.end());
+    for (int i = 0; i < clientHttpRequest.headersCount; ++i) {
+        std::string headerName = clientHttpRequest.headers[i].name;
+        headerName.erase(headerName.begin() + clientHttpRequest.headers[i].name_len, headerName.end());
+        std::string headerValue = clientHttpRequest.headers[i].value;
+        headerValue.erase(headerValue.begin() + clientHttpRequest.headers[i].value_len, headerValue.end());
 
         if (headerName == "Connection") {
             continue;
         }
         if (headerName == "Host") {
-            buildingHttpRequest.host = headerValue;
+            clientHttpRequest.host = headerValue;
         }
 
-        newRequest.append(headerName).append(": ").append(headerValue) += "\r\n";
+        processedRequest.append(headerName).append(": ").append(headerValue) += "\r\n";
     }
 
-    newRequest += "\r\n\r\n";
-
-    return buildingHttpRequest;
+    processedRequest += "\r\n\r\n";
+    connectionState = ClientConnectionStates::WAIT_FOR_ANSWER;
+    requestValidatorState = ClientRequestErrors::WITHOUT_ERRORS;
 }
 
-ssize_t ClientConnection::receiveData() {
+/*
+ * return:
+ * 0 - если запрос не получен до конца
+ * 1 - запрос получен и распарсен
+ * -1 - ошибка соединения
+ * */
+int ClientConnection::receiveRequest() {
     char buf[RECV_BUF_SIZE];
     ssize_t recvCount;
-    if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) < 0) {
-        connectionState = ClientConnectionStates::ERROR;
-        errorState = ClientConnectionErrors::ERROR_500;
-        perror("RECEIVE FROM CLIENT SOCKET ERROR\n");
-    }
 
-    if (recvCount >= 0) {
+    if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) < 0) {
+        connectionState = ClientConnectionStates::CONNECTION_ERROR;
+        perror("RECEIVE FROM CLIENT SOCKET WRONG_REQUEST\n");
+        return -1;
+    } else {
         recvRequestBuf.insert(recvRequestBuf.end(), buf, buf + recvCount);
         if (recvRequestBuf[recvRequestBuf.size() - 4] == '\r'
             && recvRequestBuf[recvRequestBuf.size() - 3] == '\n'
             && recvRequestBuf[recvRequestBuf.size() - 2] == '\r'
             && recvRequestBuf[recvRequestBuf.size() - 1] == '\n') {
-            connectionState = ClientConnectionStates::WAIT_FOR_ANSWER;
+            parseHttpRequest();
+            return 1;
         } else {
             connectionState = ClientConnectionStates::PROCESS_REQUEST;
+            return 0;
         }
     }
-    return recvCount;
 }

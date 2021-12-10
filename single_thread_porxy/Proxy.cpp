@@ -46,7 +46,7 @@ Proxy::Proxy(int listeningPort) : isInterrupt(false),
 
     // биндим порт только на наш сокет
     if (bind(listeningSocketFd, (struct sockaddr *) &socketAddress, sizeof(socketAddress)) == -1) {
-        std::cerr << "BIND LISTENING SOCKET ERROR" << std::endl;
+        std::cerr << "BIND LISTENING SOCKET WRONG_REQUEST" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -76,14 +76,14 @@ void Proxy::acceptNewConnection() {
     }
 
     int inPollListIdx = addConnectionFdInPollList(acceptedSockFd, POLLIN);
-    clientsConnections.emplace_back(acceptedSockFd, inPollListIdx);
+    clientsConnections.emplace_back(std::make_shared<ClientConnection>(acceptedSockFd, inPollListIdx));
 }
 
 void Proxy::run() {
     int pollStatus;
     while (!isInterrupt) {
         if ((pollStatus = poll(pollList, MAX_CONNECTION_NUM, 0)) == -1) {
-            std::cerr << "POLL ERROR. Errno = " << errno << std::endl;
+            std::cerr << "POLL WRONG_REQUEST. Errno = " << errno << std::endl;
             continue;
         }
 
@@ -100,54 +100,82 @@ void Proxy::shutdown() {
     isInterrupt = true;
 }
 
-bool Proxy::isReadyToSend(Connection &connection) {
-    return pollList[connection.getInPollListIdx()].revents & POLLOUT;
+bool Proxy::isReadyToSend(int connectionIdxInPollList) {
+    return (pollList[connectionIdxInPollList].revents & POLLOUT) == POLLOUT;
 }
 
-bool Proxy::isReadyToReceive(Connection &connection) {
-    return pollList[connection.getInPollListIdx()].revents & POLLIN; // >0 == true
+bool Proxy::isReadyToReceive(int connectionIdxInPollList) {
+    return (pollList[connectionIdxInPollList].revents & POLLIN) == POLLIN;
 }
 
-bool Proxy::checkClientConnectionForErrors(ClientConnection &clientConnection) {
-    if (pollList[clientConnection.getInPollListIdx()].revents & POLLHUP) {
-        clientConnection.setState(ClientConnectionStates::TERMINATED,
-                                  ClientConnectionErrors::WITHOUT_ERRORS);
-    } else if (pollList[clientConnection.getInPollListIdx()].revents & POLLERR ||
-               pollList[clientConnection.getInPollListIdx()].revents & POLLNVAL) {
-        clientConnection.setState(ClientConnectionStates::ERROR,
-                                  ClientConnectionErrors::ERROR_500);
-    } else {
-        return false;
+bool Proxy::checkConnectionSocketForErrors(int connectionIdxInPollList) {
+    if (pollList[connectionIdxInPollList].revents & POLLHUP
+        || pollList[connectionIdxInPollList].revents & POLLERR
+        || pollList[connectionIdxInPollList].revents & POLLNVAL) {
+        return true;
     }
-    return true;
+    return false;
+}
+
+void Proxy::handleClientSocketError(std::shared_ptr<ClientConnection> &clientConnection) {
+    switch (clientConnection->getState()) {
+        case ClientConnectionStates::WAIT_FOR_REQUEST : {
+            break;
+        }
+        case ClientConnectionStates::PROCESS_REQUEST : {
+            break;
+        }
+        case ClientConnectionStates::WAIT_FOR_ANSWER : {
+            clientsWaitingForResponse[clientConnection->getRequestUrl()].erase(clientConnection);
+            break;
+        }
+        case ClientConnectionStates::RECEIVING_ANSWER : {
+            clientsWaitingForResponse[clientConnection->getRequestUrl()].erase(clientConnection);
+        }
+    }
+    removeConnectionFdFromPollList(clientConnection->getInPollListIdx());
+    clientConnection->close();
 }
 
 void Proxy::updateClientsConnections() {
     for (auto iterator = clientsConnections.begin(); iterator != clientsConnections.end(); ++iterator) {
-        ClientConnection &clientConnection = *iterator;
+        std::shared_ptr<ClientConnection> &clientConnection = *iterator;
 
-        if (pollList[clientConnection.getInPollListIdx()].revents & POLLIN) { // можем принять данные из клиентск.
-
+        if (checkConnectionSocketForErrors(clientConnection->getInPollListIdx())) {
+            handleClientSocketError(clientConnection);
+            clientsConnections.erase(iterator); // TODO правильный ли будет итератор на след итерации
+            continue;
         }
 
-        pollList[clientConnection.getInPollListIdx()].revents = 0;
+        if (isReadyToReceive(clientConnection->getInPollListIdx())) { // можем принять данные из клиентск.
+            if (clientConnection->receiveRequest()) {
+                if (clientConnection->getState() != ClientConnectionStates::CONNECTION_ERROR) {
+                    handleArrivalOfClientRequest(clientConnection);
+                } else {
+                    handleClientSocketError(clientConnection);
+                    clientsConnections.erase(iterator);
+                    continue;
+                }
+            }
+        }
+
+        if (isReadyToSend(clientConnection->getInPollListIdx())) {
+            // TODO
+        }
+
+        pollList[clientConnection->getInPollListIdx()].revents = 0; // нужно ли?
     }
-
-
-//    for (auto &clientConnection : clientsConnections) {
-//        if (pollList[clientConnection.getInPollListIdx()].revents & POLLIN) { // можем принять данные из клиентск.
-//
-//        }
-//
-//        pollList[clientConnection.getInPollListIdx()].revents = 0;
-//    }
 }
 
 
-void Proxy::handleArrivalOfClientRequest(ClientConnection &clientConnection) {
-
+void Proxy::handleArrivalOfClientRequest(std::shared_ptr<ClientConnection> &clientConnection) {
+    if (clientConnection->getState() == ClientConnectionStates::WRONG_REQUEST) {
+        //
+    } else {
+        // 3 случая кэша?
+    }
 }
 
-void Proxy::handleArrivalOfServerResponse(ClientConnection &clientConnection) {
+void Proxy::handleArrivalOfServerResponse(std::shared_ptr<ClientConnection> &clientConnection) {
 
 }

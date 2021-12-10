@@ -37,5 +37,7 @@ CMakeFiles/single_thread_porxy.dir/main.cpp.o
  /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
  /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
  /home/yevsyukof/CLionProjects/single_thread_porxy/Constants.h
+ /home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.h
+ /home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpRequest.h
  /home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.h
  /home/yevsyukof/CLionProjects/single_thread_porxy/main.cpp

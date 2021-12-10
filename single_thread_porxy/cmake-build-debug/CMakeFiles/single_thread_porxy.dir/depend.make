@@ -37,5 +37,7 @@ CMakeFiles/single_thread_porxy.dir/main.cpp.o: \
  ../Connections/Connection.h \
  ../Connections/ServerConnection.h \
  ../Constants.h \
+ ../HttpParser/HttpParser.h \
+ ../HttpParser/HttpRequest.h \
  ../Proxy.h \
  ../main.cpp

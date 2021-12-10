@@ -4,18 +4,20 @@
 #include <vector>
 #include "Connection.h"
 #include "sys/socket.h"
+#include "../HttpParser/HttpRequest.h"
 
 
 enum class ClientConnectionStates {
-    TERMINATED, // соединение прервано
-    ERROR, // ошибка с соединением
+//    TERMINATED, // соединение прервано
+    CONNECTION_ERROR,
+    WRONG_REQUEST, // ошибка с соединением
     WAIT_FOR_REQUEST, // соединение еще ничего не прислало
     PROCESS_REQUEST, // соединение в процессе получения запроса
-    WAIT_FOR_ANSWER, // запрос от клиента получен, идет его обработка
+    WAIT_FOR_ANSWER, // запрос от клиента получен, распарсен и валиден
     RECEIVING_ANSWER // передача ответа клиенту
 };
 
-enum class ClientConnectionErrors {
+enum class ClientRequestErrors {
     WITHOUT_ERRORS,
     ERROR_405,
     ERROR_500,
@@ -27,20 +29,26 @@ class ClientConnection : public Connection {
 public:
     ClientConnection(int connectionSocketFd, int inPollListIdx);
 
-    ssize_t receiveData();
+    int receiveRequest();
 
     ClientConnectionStates getState() const {
         return connectionState;
     }
 
-    void setState(ClientConnectionStates state, ClientConnectionErrors error) {
+    void setState(ClientConnectionStates state, ClientRequestErrors error) {
         connectionState = state;
-        errorState = error;
+        requestValidatorState = error;
     }
 
 private:
+    void parseHttpRequest();
+
+private:
     ClientConnectionStates connectionState;
-    ClientConnectionErrors errorState;
+    ClientRequestErrors requestValidatorState;
+
+    HttpRequest clientHttpRequest;
+    std::string processedRequest;
 };
 
 

@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <sys/poll.h>
 #include "Proxy.h"
+#include "HttpParser/HttpRequest.h"
 
 #define LISTENING_PORT 55555
 
@@ -26,16 +27,8 @@ void set_sig_handler() {
     sigaction(SIGINT, &sig_action, nullptr);
 }
 
+
 int main() {
-    pollfd a[11] = {0};
-    a[0].fd = -123;
-    a[1].fd = -123;
-    a[0].events = POLLIN;
-
-    if (poll(a, 11, -1) == -1) {
-        std::cerr << "syka";
-    }
-
 //    set_sig_handler();
 //    cachingProxy = Proxy(LISTENING_PORT);
 //    cachingProxy.run();

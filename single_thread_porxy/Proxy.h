@@ -4,6 +4,7 @@
 #include <map>
 #include <queue>
 #include <set>
+#include <list>
 #include <memory>
 #include <vector>
 #include <sys/socket.h>
@@ -32,17 +33,19 @@ private:
 
     void removeConnectionFdFromPollList(int connectionIdxInPollList);
 
-    bool isReadyToSend(Connection &connection);
+    bool isReadyToSend(int connectionIdxInPollList);
 
-    bool isReadyToReceive(Connection &connection);
+    bool isReadyToReceive(int connectionIdxInPollList);
+
+    bool checkConnectionSocketForErrors(int connectionIdxInPollList);
 
     void updateClientsConnections();
 
-    bool checkClientConnectionForErrors(ClientConnection &clientConnection);
+    void handleClientSocketError(std::shared_ptr<ClientConnection> &clientConnection);
 
-    void handleArrivalOfClientRequest(ClientConnection &clientConnection);
+    void handleArrivalOfClientRequest(std::shared_ptr<ClientConnection> &clientConnection);
 
-    void handleArrivalOfServerResponse(ClientConnection &clientConnection);
+    void handleArrivalOfServerResponse(std::shared_ptr<ClientConnection> &clientConnection);
 
 private:
     bool isInterrupt;
@@ -54,10 +57,10 @@ private:
     int listeningSockInPollListIdx;
     std::priority_queue<int, std::vector<int>, std::ranges::greater> freeIndexesInPollList;
 
-    std::vector<ClientConnection> clientsConnections;
-    std::vector<ServerConnection> serversConnections;
+    std::list<std::shared_ptr<ClientConnection>> clientsConnections;
+    std::list<std::shared_ptr<ServerConnection>> serversConnections;
 
-    std::map<std::string, std::set<ClientConnection>> clientsWaitingForResponse; // url -> clients
+    std::map<std::string, std::set<std::shared_ptr<ClientConnection>>> clientsWaitingForResponse; // url -> clients
 
     Cache cacheStorage;
 };
