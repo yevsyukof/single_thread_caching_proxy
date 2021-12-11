@@ -33,9 +33,9 @@ private:
 
     void removeConnectionFdFromPollList(int connectionIdxInPollList);
 
-    int isReadyToSend(int connectionIdxInPollList) const;
+    int isReadyForWrite(int connectionIdxInPollList) const;
 
-    int isReadyToReceive(int connectionIdxInPollList) const;
+    int isReadyForRead(int connectionIdxInPollList) const;
 
     bool checkConnectionSocketForErrors(int connectionIdxInPollList) const;
 
@@ -66,8 +66,7 @@ private:
 
     void initializeNewServerConnection(int newServerConnectionSocketFd,
                                        const std::string &requestUrl,
-                                       const std::string& processedRequestForServer);
-
+                                       const std::shared_ptr<std::string>& processedRequestForServer);
 
 private:
     bool isInterrupt;

@@ -3,7 +3,6 @@
 #include <memory.h>
 #include <sys/poll.h>
 #include "Proxy.h"
-#include "HttpParser/HttpRequest.h"
 
 #define LISTENING_PORT 55555
 

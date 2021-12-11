@@ -75,30 +75,31 @@ void ClientConnection::parseRequestAndCheckValidity() {
         ss << "\r\n";
     }
 
-    processedRequestForServer += "\r\n\r\n";
     connectionState = ClientConnectionStates::PROCESSING_REQUEST;
     requestValidatorState = ClientRequestErrors::WITHOUT_ERRORS;
 
-    requestUrl = clientHttpRequest.method + " " + clientHttpRequest.url;
+    processedRequestForServer = std::make_shared<std::string>(ss.str());
+
+    requestUrl = clientHttpRequest.method + " " + clientHttpRequest.uri;
 }
 
 int ClientConnection::receiveRequest() {
     char buf[RECV_BUF_SIZE];
     ssize_t recvCount;
 
-    if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) < 0) {
+    if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) <= 0) {
         std::cout << "--------RECEIVE FROM CLIENT SOCKET ERROR--------" << std::endl;
 
         connectionState = ClientConnectionStates::CONNECTION_ERROR;
         return SOCKET_RECEIVE_ERROR;
     } else {
         recvBuf->insert(recvBuf->end(), buf, buf + recvCount);
-        if ((*recvBuf)[recvBuf->size() - 4] == '\r'
+        if (recvBuf->size() >= 4 && (*recvBuf)[recvBuf->size() - 4] == '\r'
             && (*recvBuf)[recvBuf->size() - 3] == '\n'
             && (*recvBuf)[recvBuf->size() - 2] == '\r'
             && (*recvBuf)[recvBuf->size() - 1] == '\n') {
 
-            parseRequestAndCheckValidity(); // TODO
+            parseRequestAndCheckValidity();
             return FULL_RECEIVE_REQUEST;
         } else {
             connectionState = ClientConnectionStates::RECEIVING_REQUEST;
@@ -107,7 +108,7 @@ int ClientConnection::receiveRequest() {
     }
 }
 
-int ClientConnection::sendAnswer() { // TODO
+int ClientConnection::sendAnswer() {
     int sendCount;
     if ((sendCount = send(connectionSocketFd,
                           sendAnswerBuf->data() + sendAnswerOffset,

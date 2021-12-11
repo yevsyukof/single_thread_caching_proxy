@@ -57,6 +57,10 @@ public:
         return clientHttpRequest;
     }
 
+    const std::string& getRequiredHost() const {
+        return requiredHost;
+    }
+
     const std::shared_ptr<std::string>& getProcessedRequestForServer() const {
         return processedRequestForServer;
     }

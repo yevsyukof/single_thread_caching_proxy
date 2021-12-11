@@ -16,13 +16,14 @@ void initFreeIndexesInPollListQueue(
     }
 }
 
-int Proxy::addConnectionFdInPollList(int socketFd, short events) {
+int Proxy::addConnectionFdInPollList(int socketFd, short int events) {
     int curFreeIdxInPollList = freeIndexesInPollList.top();
     freeIndexesInPollList.pop();
 
     ++pollListSize;
     pollList[curFreeIdxInPollList].fd = socketFd;
     pollList[curFreeIdxInPollList].events = events;
+    pollList[curFreeIdxInPollList].revents = 0;
     return curFreeIdxInPollList;
 }
 
@@ -101,11 +102,11 @@ void Proxy::shutdown() {
     isInterrupt = true;
 }
 
-int Proxy::isReadyToSend(int connectionIdxInPollList) const {
+int Proxy::isReadyForWrite(int connectionIdxInPollList) const {
     return pollList[connectionIdxInPollList].revents & POLLOUT;
 }
 
-int Proxy::isReadyToReceive(int connectionIdxInPollList) const {
+int Proxy::isReadyForRead(int connectionIdxInPollList) const {
     return pollList[connectionIdxInPollList].revents & POLLIN;
 }
 
@@ -143,7 +144,9 @@ void Proxy::updateClientsConnections() {
             continue;
         }
 
-        if (isReadyToReceive(clientConnection->getInPollListIdx())) { // можем принять данные из клиентск.
+        if (isReadyForRead(clientConnection->getInPollListIdx())) { // можем принять данные из клиентск.
+//            std::cout << "isReadyForRead(): client sedning info to us................................." << std::endl;
+
             if (clientConnection->receiveRequest()) {
                 if (clientConnection->getState() != ClientConnectionStates::CONNECTION_ERROR) {
                     handleArrivalOfClientRequest(clientConnection);
@@ -153,7 +156,10 @@ void Proxy::updateClientsConnections() {
                     continue;
                 }
             }
-        } else if (isReadyToSend(clientConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
+        } else if (isReadyForWrite(clientConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
+            std::cout << "isReadyForWrite(): client WAITING for ifoo................................." << std::endl;
+
+
             if (clientConnection->sendAnswer()) {
                 shutdownClientConnection(clientConnection);
                 iterator = clientsConnections.erase(iterator);
@@ -166,6 +172,9 @@ void Proxy::updateClientsConnections() {
 }
 
 void Proxy::handleArrivalOfClientRequest(const std::shared_ptr<ClientConnection> &clientConnection) {
+    /// пока ответ от Сервера не пришел, нам не интересны события, генерируемые клиентом
+    pollList[clientConnection->getInPollListIdx()].events = 0; /// TODO а то пока он ждет - жрет время
+
     if (clientConnection->getState() == ClientConnectionStates::WRONG_REQUEST) {
         switch (clientConnection->getError()) {
             case ClientRequestErrors::ERROR_400: {
@@ -205,7 +214,7 @@ void Proxy::handleArrivalOfClientRequest(const std::shared_ptr<ClientConnection>
             clientsWaitingForResponse[clientConnection->getRequestUrl()].insert(clientConnection);
             pollList[clientConnection->getInPollListIdx()].events = 0; // клиента разбудит обработчик прибытия ответа
         } else { /// записи нет
-            int newServerConnectionSocketFd = resolveRequiredHost(clientConnection->getClientHttpRequest().host);
+            int newServerConnectionSocketFd = resolveRequiredHost(clientConnection->getRequiredHost());
             if (newServerConnectionSocketFd >= 0) {
                 initializeNewServerConnection(newServerConnectionSocketFd,
                                               clientConnection->getRequestUrl(),
@@ -288,7 +297,7 @@ void Proxy::updateServersConnections() {
             continue;
         }
 
-        if (isReadyToSend(serverConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
+        if (isReadyForWrite(serverConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
             if (serverConnection->sendRequest()) {
                 if (serverConnection->getState() == ServerConnectionState::RECEIVING_ANSWER) {
                     // инициализируем принятие ответа от вышестоящего сервера
@@ -300,7 +309,9 @@ void Proxy::updateServersConnections() {
                     continue;
                 }
             }
-        } else if (isReadyToReceive(serverConnection->getInPollListIdx())) { // можем принять данные
+        } else if (isReadyForRead(serverConnection->getInPollListIdx())) { // можем принять данные
+            std::cout << "SERVER CON ZHDET OTVET" << std::endl;
+
             if (serverConnection->receiveAnswer()) {
                 shutdownServerConnection(serverConnection);
                 iterator = serversConnections.erase(iterator);
@@ -320,35 +331,37 @@ int Proxy::resolveRequiredHost(const std::string &host) const {
 
     memset(&hints, 0, sizeof(addrinfo));
     hints.ai_family = AF_INET;    /* Разрешены IPv4*/
-    hints.ai_socktype = SOCK_STREAM; /* Сокет для дейтаграмм */
+    hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
     if (getaddrinfo(host.c_str(), nullptr, &hints, &resolvedList) != 0) {
-        std::cout << "getaddrinfo ERROR" << std::endl;
+        std::cout << "getaddrinfo() ERROR" << std::endl;
         return -1;
     }
 
-    int found_socket;
+    int found_socket = -1;
     for (addrinfo *nextFoundAddress = resolvedList; nextFoundAddress != nullptr;
          nextFoundAddress = nextFoundAddress->ai_next) {
 
-        ((sockaddr_in *) nextFoundAddress)->sin_port = htons(80);
+        ((sockaddr_in *) nextFoundAddress->ai_addr)->sin_port = htons(80);
 
-        found_socket = socket(nextFoundAddress->ai_family, nextFoundAddress->ai_socktype,
-                              nextFoundAddress->ai_protocol);
-        if (found_socket == -1) {
+        if ((found_socket = socket(nextFoundAddress->ai_family, nextFoundAddress->ai_socktype,
+                              nextFoundAddress->ai_protocol)) == -1) {
             std::cout << "resolveRequiredHost(): Socket error" << std::endl;
-            continue;
-        }
-        if (connect(found_socket, (sockaddr *) &nextFoundAddress, sizeof(*nextFoundAddress)) == 0) {
-            std::cout << "resolveRequiredHost(): Can't connect" << std::endl;
             break;
         }
+
+        if (connect(found_socket, nextFoundAddress->ai_addr, nextFoundAddress->ai_addrlen) == 0) {
+            std::cout << "resolveRequiredHost(): connect" << std::endl;
+            break;
+        }
+
         close(found_socket);
         found_socket = -1;
     }
-    freeaddrinfo(resolvedList);
+    std::cout << "END RESOLVE ADDRESS" << std::endl;
 
+    freeaddrinfo(resolvedList);
     return found_socket;
 }
 
@@ -359,7 +372,7 @@ void Proxy::addClientInWaitersList(const std::shared_ptr<ClientConnection> &clie
 
 void Proxy::initializeNewServerConnection(int newServerConnectionSocketFd,
                                           const std::string &requestUrl,
-                                          const std::string &processedRequestForServer) {
+                                          const std::shared_ptr<std::string> &processedRequestForServer) {
     int inPollListIdx = addConnectionFdInPollList(newServerConnectionSocketFd, POLLOUT);
     serversConnections.emplace_back(std::make_shared<ServerConnection>(newServerConnectionSocketFd,
                                                                        inPollListIdx,

@@ -21,6 +21,11 @@ static const std::string ERROR_MESSAGE_501 = "HTTP/1.0 501 Not Implemented\r\nAl
 
 static const std::string ERROR_MESSAGE_504 = "HTTP/1.0 504 Gateway Timeout\r\n\r\n";
 
-static const std::string ERROR_MESSAGE_505 = "HTTP/1.0 505 HTTP Version not supported\r\n\r\n";
+//static const std::string ERROR_MESSAGE_505 = "HTTP/1.0 505 HTTP Version not supported\r\n\r\n";
+
+static const std::string ERROR_MESSAGE_505 = "HTTP/1.0 505 HTTP Version not supported\r\n\
+\r\n<html><head><title>505 HTTP Version not supported</title></head> \
+<body><h2>505 HTTP Version not supported</h2><h3>Proxy server does not support the HTTP protocol version used in the request.</h3></body></html>\r\n";
+
 
 #endif //SINGLE_THREAD_PORXY_CONSTANTS_H

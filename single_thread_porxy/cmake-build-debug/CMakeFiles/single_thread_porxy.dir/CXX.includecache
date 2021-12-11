@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.cpp
+Cache.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
+
 /home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
 map
 -
@@ -22,11 +26,23 @@ vector
 memory
 -
 
+/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.cpp
+string
+-
+iostream
+-
+ClientConnection.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
+
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 Connection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
 ../Cache/CacheEntry.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Cache/CacheEntry.h
+../HttpParser/httprequestparser.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httprequestparser.h
+../HttpParser/request.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/request.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
 vector
@@ -39,8 +55,18 @@ unistd.h
 -
 sys/socket.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/sys/socket.h
-../HttpParser/HttpRequest.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpRequest.h
+
+/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.cpp
+iostream
+-
+utility
+-
+sys/socket.h
+-
+ServerConnection.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
+../HttpParser/httpresponseparser.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httpresponseparser.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
 Connection.h
@@ -48,13 +74,41 @@ Connection.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Constants.h
 
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.h
-sys/types.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httprequestparser.h
+algorithm
+-
+cstring
+-
+cstdlib
+-
+request.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/request.h
+
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httpresponseparser.h
+algorithm
+-
+cstring
+-
+cstdlib
+-
+response.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/response.h
+
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/request.h
+string
+-
+vector
+-
+sstream
 -
 
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpRequest.h
-HttpParser.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/response.h
+string
+-
+vector
+-
+sstream
+-
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.cpp
 poll.h
@@ -97,4 +151,16 @@ Connections/ClientConnection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 Connections/ServerConnection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
+
+/home/yevsyukof/CLionProjects/single_thread_porxy/main.cpp
+iostream
+-
+csignal
+-
+memory.h
+-
+sys/poll.h
+-
+Proxy.h
+/home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.h
 

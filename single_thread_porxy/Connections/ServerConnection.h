@@ -13,7 +13,8 @@ enum class ServerConnectionState {
 class ServerConnection : public Connection {
 public:
     ServerConnection(int connectionSocketFd, int inPollListIdx,
-                     const std::string &requestUrl, const std::string& processedRequestForServer);
+                     const std::string &requestUrl,
+                     std::shared_ptr<std::string>  processedRequestForServer);
 
     ServerConnectionState getState() const {
         return connectionState;
@@ -32,7 +33,7 @@ public:
     int receiveAnswer();
 
 private:
-    const std::string& processedRequestForServer;
+    std::shared_ptr<std::string> processedRequestForServer;
     int sendRequestOffset;
 
     ServerConnectionState connectionState;
