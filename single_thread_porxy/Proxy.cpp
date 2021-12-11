@@ -48,13 +48,13 @@ Proxy::Proxy(int listeningPort) : isInterrupt(false),
 
     // биндим порт только на наш сокет
     if (bind(listeningSocketFd, (struct sockaddr *) &socketAddress, sizeof(socketAddress)) == -1) {
-        std::cerr << "BIND LISTENING SOCKET WRONG_REQUEST" << std::endl;
+        std::cout << "--------Proxy(): BIND LISTENING SOCKET WRONG_REQUEST--------" << std::endl;
         exit(EXIT_FAILURE);
     }
 
     // помечаем сокет как слушающий
     if (listen(listeningSocketFd, SOMAXCONN) == -1) {
-        std::cerr << "LISTEN FAIL" << std::endl;
+        std::cout << "--------Proxy(): LISTEN FAIL--------" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -70,12 +70,11 @@ Proxy::Proxy(int listeningPort) : isInterrupt(false),
 void Proxy::acceptNewConnection() {
     int acceptedSockFd = accept(listeningSocketFd, nullptr, nullptr);
 
-    std::cout << "NEW CONNECTION: " << acceptedSockFd << std::endl;
-
     if (acceptedSockFd < 0) {
-        std::cerr << "Error accepting connection\n";
+        std::cout << "--------acceptNewConnection(): Error accepting connection--------" << std::endl;
         return;
     }
+    std::cout << "~~~~~~~~~~~~~~~~~~~~ NEW CONNECTION: " << acceptedSockFd << " ~~~~~~~~~~~~~~~~~~~~" << std::endl;
 
     /// ошибки не обязательно ставить в events, они все равно появлятся в revents
     int inPollListIdx = addConnectionFdInPollList(acceptedSockFd, POLLIN);
@@ -85,7 +84,7 @@ void Proxy::acceptNewConnection() {
 void Proxy::run() {
     while (!isInterrupt) {
         if (poll(pollList, MAX_CONNECTION_NUM, -1) == -1) {
-            std::cerr << "Proxy.run(): POLL ERROR. Errno = " << errno << std::endl;
+            std::cout << "--------Proxy.run(): POLL ERROR--------" << std::endl;
             continue;
         }
 
@@ -129,9 +128,9 @@ void Proxy::shutdownClientConnection(const std::shared_ptr<ClientConnection> &cl
             break;
         }
     }
+    std::cout << "________shutdownClientConnection(): SHUTDOWN CLIENT________\n\n" << std::endl;
     removeConnectionFdFromPollList(clientConnection->getInPollListIdx());
     clientConnection->close();
-    std::cerr << "shutdown client\n" << std::endl;
 }
 
 void Proxy::updateClientsConnections() {
@@ -140,7 +139,7 @@ void Proxy::updateClientsConnections() {
 
         if (checkConnectionSocketForErrors(clientConnection->getInPollListIdx())) {
             shutdownClientConnection(clientConnection);
-            iterator = clientsConnections.erase(iterator); // TODO правильный ли будет итератор на след итерации
+            iterator = clientsConnections.erase(iterator);
             continue;
         }
 
@@ -213,7 +212,7 @@ void Proxy::handleArrivalOfClientRequest(const std::shared_ptr<ClientConnection>
                                               clientConnection->getProcessedRequestForServer());
                 addClientInWaitersList(clientConnection);
             } else {
-                std::cerr << "CAN'T RESOLVE HOST\n";
+                std::cout << "--------CAN'T RESOLVE HOST--------" << std::endl;
                 initializeResponseTransmitting(clientConnection, ERROR_MESSAGE_504);
             }
         }
@@ -314,7 +313,7 @@ void Proxy::updateServersConnections() {
 }
 
 int Proxy::resolveRequiredHost(const std::string &host) const {
-    std::cerr << "RESOLVING HOST = " + host + "\n";
+    std::cout << "RESOLVING HOST = " << host << std::endl;
 
     addrinfo hints{};
     addrinfo *resolvedList = nullptr;
@@ -325,7 +324,7 @@ int Proxy::resolveRequiredHost(const std::string &host) const {
     hints.ai_protocol = IPPROTO_TCP;
 
     if (getaddrinfo(host.c_str(), nullptr, &hints, &resolvedList) != 0) {
-        std::cerr << "getaddrinfo ERROR\n";
+        std::cout << "getaddrinfo ERROR" << std::endl;
         return -1;
     }
 
@@ -338,11 +337,11 @@ int Proxy::resolveRequiredHost(const std::string &host) const {
         found_socket = socket(nextFoundAddress->ai_family, nextFoundAddress->ai_socktype,
                               nextFoundAddress->ai_protocol);
         if (found_socket == -1) {
-            std::cerr << "resolve(): Socket error\n";
+            std::cout << "resolveRequiredHost(): Socket error" << std::endl;
             continue;
         }
         if (connect(found_socket, (sockaddr *) &nextFoundAddress, sizeof(*nextFoundAddress)) == 0) {
-            std::cerr << "Can't connect\n";
+            std::cout << "resolveRequiredHost(): Can't connect" << std::endl;
             break;
         }
         close(found_socket);
@@ -360,7 +359,7 @@ void Proxy::addClientInWaitersList(const std::shared_ptr<ClientConnection> &clie
 
 void Proxy::initializeNewServerConnection(int newServerConnectionSocketFd,
                                           const std::string &requestUrl,
-                                          const std::string& processedRequestForServer) {
+                                          const std::string &processedRequestForServer) {
     int inPollListIdx = addConnectionFdInPollList(newServerConnectionSocketFd, POLLOUT);
     serversConnections.emplace_back(std::make_shared<ServerConnection>(newServerConnectionSocketFd,
                                                                        inPollListIdx,

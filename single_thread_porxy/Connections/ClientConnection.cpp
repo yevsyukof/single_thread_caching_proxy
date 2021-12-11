@@ -17,6 +17,15 @@ ClientConnection::ClientConnection(int connectionSocketFd, int inPollListIdx)
           connectionState(ClientConnectionStates::WAITING_FOR_REQUEST) {}
 
 
+void logClientRequestReceived(const std::vector<char> & a) {
+    std::cout << "**************** received request: ****************" << std::endl;
+    for (char c : a) {
+        std::cout << c;
+    }
+    std::cout << std::endl;
+    std::cout << "**************** end request ****************" << std::endl;
+}
+
 void ClientConnection::parseHttpRequestAndUpdateState() {
     const char *path;
     const char *method;
@@ -28,15 +37,16 @@ void ClientConnection::parseHttpRequestAndUpdateState() {
                                     &clientHttpRequest.headersCount, 0);
 
     if (reqSize <= -1) {
-        std::cout << method << "\n\n";
-        std::cerr << "BAD HTTP REQUEST\n";
+        std::cout << "--------BAD HTTP REQUEST--------" << std::endl;
+
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_501;
         return;
     }
 
     if (http_version_minor != 0) {
-        std::cerr << "WRONG HTTP VERSION\n";
+        std::cout << "--------WRONG HTTP VERSION--------" << std::endl;
+
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_505;
         return;
@@ -51,7 +61,8 @@ void ClientConnection::parseHttpRequestAndUpdateState() {
     clientHttpRequest.method = onlyMethod;
 
     if (clientHttpRequest.method != "GET" && clientHttpRequest.method != "HEAD") {
-        std::cerr << "NOT IMPLEMENTED HTTP METHOD\n";
+        std::cout << "--------NOT IMPLEMENTED HTTP METHOD--------" << std::endl;
+
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_405;
         return;
@@ -76,7 +87,8 @@ void ClientConnection::parseHttpRequestAndUpdateState() {
     }
 
     if (clientHttpRequest.host.empty()) {
-        std::cerr << "HASN'T HOST\n";
+        std::cout << "--------HASN'T HOST--------" << std::endl;
+
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_400;
         return;
@@ -94,8 +106,9 @@ int ClientConnection::receiveRequest() {
     ssize_t recvCount;
 
     if ((recvCount = recv(connectionSocketFd, buf, RECV_BUF_SIZE, 0)) < 0) {
+        std::cout << "--------RECEIVE FROM CLIENT SOCKET ERROR--------" << std::endl;
+
         connectionState = ClientConnectionStates::CONNECTION_ERROR;
-        std::cerr << "RECEIVE FROM CLIENT SOCKET ERROR\n";
         return SOCKET_RECEIVE_ERROR;
     } else {
         recvBuf->insert(recvBuf->end(), buf, buf + recvCount);
@@ -103,7 +116,10 @@ int ClientConnection::receiveRequest() {
             && (*recvBuf)[recvBuf->size() - 3] == '\n'
             && (*recvBuf)[recvBuf->size() - 2] == '\r'
             && (*recvBuf)[recvBuf->size() - 1] == '\n') {
-            parseHttpRequestAndUpdateState();
+
+            logClientRequestReceived(*recvBuf);
+
+            parseHttpRequestAndUpdateState(); // TODO
             return FULL_RECEIVE_REQUEST;
         } else {
             connectionState = ClientConnectionStates::RECEIVING_REQUEST;
@@ -117,17 +133,23 @@ int ClientConnection::sendAnswer() { // TODO
     if ((sendCount = send(connectionSocketFd,
                           sendAnswerBuf->data() + sendAnswerOffset,
                           sendAnswerBuf->size() - sendAnswerOffset, 0)) == -1) {
-        std::cerr << "CLIENT SEND ANSWER ERROR\n";
+        std::cout << "--------sendAnswer(): SEND ERROR--------" << std::endl;
+
         connectionState = ClientConnectionStates::CONNECTION_ERROR;
         return SOCKET_SEND_ERROR;
     } else {
         sendAnswerOffset += sendCount;
         if (sendAnswerOffset == sendAnswerBuf->size()) {
             connectionState = ClientConnectionStates::ANSWER_RECEIVED;
-            std::cerr << "CLIENT RECEIVE ANSWER\n";
+
+            std::cout << "--------sendAnswer(): CLIENT RECEIVE ANSWER--------" << std::endl;
+
             return FULL_SEND_ANSWER;
         } else {
-            std::cerr << "offset = " << sendAnswerOffset << " fullSize = " << sendAnswerBuf->size() << std::endl;
+            std::cout << "--------sendAnswer(): ";
+            std::cout << "offset = " << sendAnswerOffset << " fullSize = " << sendAnswerBuf->size() << std::endl;
+            std::cout << "--------" << std::endl;
+
             return NOT_FULL_SEND_ANSWER;
         }
     }
