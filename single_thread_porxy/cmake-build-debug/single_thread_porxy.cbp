@@ -109,13 +109,19 @@
 		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/Constants.h">
 			<Option target="single_thread_porxy"/>
 		</Unit>
-		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.c">
+		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httprequestparser.h">
 			<Option target="single_thread_porxy"/>
 		</Unit>
-		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.h">
+		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httpresponseparser.h">
 			<Option target="single_thread_porxy"/>
 		</Unit>
-		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpRequest.h">
+		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/request.h">
+			<Option target="single_thread_porxy"/>
+		</Unit>
+		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/response.h">
+			<Option target="single_thread_porxy"/>
+		</Unit>
+		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/urlparser.h">
 			<Option target="single_thread_porxy"/>
 		</Unit>
 		<Unit filename="/home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.cpp">

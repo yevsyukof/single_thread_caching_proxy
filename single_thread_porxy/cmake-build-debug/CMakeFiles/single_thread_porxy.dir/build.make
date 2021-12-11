@@ -92,22 +92,9 @@ CMakeFiles/single_thread_porxy.dir/Proxy.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/single_thread_porxy.dir/Proxy.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.cpp -o CMakeFiles/single_thread_porxy.dir/Proxy.cpp.s
 
-CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o: CMakeFiles/single_thread_porxy.dir/flags.make
-CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o: ../HttpParser/HttpParser.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o -c /home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.c
-
-CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.c > CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.i
-
-CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.c -o CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.s
-
 CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o: CMakeFiles/single_thread_porxy.dir/flags.make
 CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o: ../Connections/ClientConnection.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o -c /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.cpp
 
 CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.i: cmake_force
@@ -120,7 +107,7 @@ CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.s: cmake_for
 
 CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o: CMakeFiles/single_thread_porxy.dir/flags.make
 CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o: ../Connections/ServerConnection.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o -c /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.cpp
 
 CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.i: cmake_force
@@ -133,7 +120,7 @@ CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.s: cmake_for
 
 CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o: CMakeFiles/single_thread_porxy.dir/flags.make
 CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o: ../Cache/Cache.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o -c /home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.cpp
 
 CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.i: cmake_force
@@ -148,7 +135,6 @@ CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.s: cmake_force
 single_thread_porxy_OBJECTS = \
 "CMakeFiles/single_thread_porxy.dir/main.cpp.o" \
 "CMakeFiles/single_thread_porxy.dir/Proxy.cpp.o" \
-"CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o" \
 "CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o" \
 "CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o" \
 "CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o"
@@ -158,13 +144,12 @@ single_thread_porxy_EXTERNAL_OBJECTS =
 
 single_thread_porxy: CMakeFiles/single_thread_porxy.dir/main.cpp.o
 single_thread_porxy: CMakeFiles/single_thread_porxy.dir/Proxy.cpp.o
-single_thread_porxy: CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o
 single_thread_porxy: CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o
 single_thread_porxy: CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.o
 single_thread_porxy: CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o
 single_thread_porxy: CMakeFiles/single_thread_porxy.dir/build.make
 single_thread_porxy: CMakeFiles/single_thread_porxy.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable single_thread_porxy"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable single_thread_porxy"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/single_thread_porxy.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

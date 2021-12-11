@@ -6,7 +6,7 @@
 #include <memory>
 #include <unistd.h>
 #include "sys/socket.h"
-#include "../HttpParser/HttpRequest.h"
+
 
 class Connection {
 public:

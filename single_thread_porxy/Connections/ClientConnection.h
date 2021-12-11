@@ -3,6 +3,8 @@
 
 #include "Connection.h"
 #include "../Cache/CacheEntry.h"
+#include "../HttpParser/httprequestparser.h"
+#include "../HttpParser/request.h"
 
 enum class ClientConnectionStates {
     CONNECTION_ERROR, // ошибка с соединением
@@ -47,32 +49,28 @@ public:
         return requestValidatorState;
     }
 
-//    void setState(const ClientConnectionStates &state, const ClientRequestErrors &error) {
-//        connectionState = state;
-//        requestValidatorState = error;
-//    }
-
     void setState(const ClientConnectionStates &state) {
         connectionState = state;
     }
 
-    const HttpRequest& getClientHttpRequest() const {
+    const httpparser::Request& getClientHttpRequest() const {
         return clientHttpRequest;
     }
 
-    const std::string& getProcessedRequestForServer() const {
+    const std::shared_ptr<std::string>& getProcessedRequestForServer() const {
         return processedRequestForServer;
     }
 
 private:
-    void parseHttpRequestAndUpdateState();
+    void parseRequestAndCheckValidity();
 
 private:
     ClientConnectionStates connectionState;
     ClientRequestErrors requestValidatorState;
 
-    HttpRequest clientHttpRequest;
-    std::string processedRequestForServer;
+    httpparser::Request clientHttpRequest;
+    std::shared_ptr<std::string> processedRequestForServer;
+    std::string requiredHost;
 
     std::shared_ptr<std::vector<char>> sendAnswerBuf;
     int sendAnswerOffset;

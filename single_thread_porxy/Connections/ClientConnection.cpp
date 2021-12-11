@@ -14,37 +14,28 @@
 
 ClientConnection::ClientConnection(int connectionSocketFd, int inPollListIdx)
         : Connection(connectionSocketFd, inPollListIdx),
-          connectionState(ClientConnectionStates::WAITING_FOR_REQUEST) {}
+          connectionState(ClientConnectionStates::WAITING_FOR_REQUEST),
+          processedRequestForServer(nullptr) {}
 
 
-void logClientRequestReceived(const std::vector<char> & a) {
-    std::cout << "**************** received request: ****************" << std::endl;
-    for (char c : a) {
-        std::cout << c;
-    }
-    std::cout << std::endl;
-    std::cout << "**************** end request ****************" << std::endl;
-}
+void ClientConnection::parseRequestAndCheckValidity() {
+    httpparser::HttpRequestParser httpRequestParser;
+    httpparser::HttpRequestParser::ParseResult parseResult = httpRequestParser
+            .parse(clientHttpRequest, recvBuf->data(), recvBuf->data() + recvBuf->size());
 
-void ClientConnection::parseHttpRequestAndUpdateState() {
-    const char *path;
-    const char *method;
-    int http_version_minor; // 1.<minor>
-    size_t methodLen, pathLen;
-
-    int reqSize = phr_parse_request(recvBuf->data(), recvBuf->size(), &method, &methodLen,
-                                    &path, &pathLen, &http_version_minor, clientHttpRequest.headers,
-                                    &clientHttpRequest.headersCount, 0);
-
-    if (reqSize <= -1) {
-        std::cout << "--------BAD HTTP REQUEST--------" << std::endl;
+    if (parseResult != httpparser::HttpRequestParser::ParsingCompleted) {
+        std::cout << "--------CAN'T PARSE HTTP REQUEST--------" << std::endl;
 
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_501;
         return;
+    } else {
+        std::cout << "**************** received request: ****************" << std::endl;
+        std::cout << clientHttpRequest.inspect() << std::endl;
+        std::cout << "**************** end request ****************" << std::endl;
     }
 
-    if (http_version_minor != 0) {
+    if (clientHttpRequest.versionMajor != 1 || clientHttpRequest.versionMinor != 0) {
         std::cout << "--------WRONG HTTP VERSION--------" << std::endl;
 
         connectionState = ClientConnectionStates::WRONG_REQUEST;
@@ -52,13 +43,6 @@ void ClientConnection::parseHttpRequestAndUpdateState() {
         return;
     }
 
-    std::string onlyPath = path;
-    onlyPath.erase(onlyPath.begin() + pathLen, onlyPath.end());
-    clientHttpRequest.url = onlyPath;
-
-    std::string onlyMethod = method;
-    onlyMethod.erase(onlyMethod.begin() + methodLen, onlyMethod.end());
-    clientHttpRequest.method = onlyMethod;
 
     if (clientHttpRequest.method != "GET" && clientHttpRequest.method != "HEAD") {
         std::cout << "--------NOT IMPLEMENTED HTTP METHOD--------" << std::endl;
@@ -68,30 +52,27 @@ void ClientConnection::parseHttpRequestAndUpdateState() {
         return;
     }
 
-    processedRequestForServer = onlyMethod + std::string(" ").append(onlyPath).append(" HTTP/1.0") + "\r\n";
+    std::stringstream ss;
+    ss << clientHttpRequest.method << " " << clientHttpRequest.uri << " HTTP/"
+           << clientHttpRequest.versionMajor << "." << clientHttpRequest.versionMinor << "\r\n";
 
-    for (int i = 0; i < clientHttpRequest.headersCount; ++i) {
-        std::string headerName = clientHttpRequest.headers[i].name;
-        headerName.erase(headerName.begin() + clientHttpRequest.headers[i].name_len, headerName.end());
-        std::string headerValue = clientHttpRequest.headers[i].value;
-        headerValue.erase(headerValue.begin() + clientHttpRequest.headers[i].value_len, headerValue.end());
-
-        if (headerName == "Connection") {
-            continue;
+    bool hasHostHeader = false;
+    for (const auto &header: clientHttpRequest.headers) {
+        ss << header.name << ": " << header.value << "\r\n";
+        if (header.name == "Host") {
+            requiredHost = header.value;
+            hasHostHeader = true;
         }
-        if (headerName == "Host") {
-            clientHttpRequest.host = headerValue;
-        }
-
-        processedRequestForServer.append(headerName).append(": ").append(headerValue) += "\r\n";
     }
 
-    if (clientHttpRequest.host.empty()) {
+    if (!hasHostHeader) {
         std::cout << "--------HASN'T HOST--------" << std::endl;
 
         connectionState = ClientConnectionStates::WRONG_REQUEST;
         requestValidatorState = ClientRequestErrors::ERROR_400;
         return;
+    } else {
+        ss << "\r\n";
     }
 
     processedRequestForServer += "\r\n\r\n";
@@ -117,9 +98,7 @@ int ClientConnection::receiveRequest() {
             && (*recvBuf)[recvBuf->size() - 2] == '\r'
             && (*recvBuf)[recvBuf->size() - 1] == '\n') {
 
-            logClientRequestReceived(*recvBuf);
-
-            parseHttpRequestAndUpdateState(); // TODO
+            parseRequestAndCheckValidity(); // TODO
             return FULL_RECEIVE_REQUEST;
         } else {
             connectionState = ClientConnectionStates::RECEIVING_REQUEST;

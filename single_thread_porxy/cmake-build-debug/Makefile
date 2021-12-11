@@ -201,30 +201,6 @@ Connections/ServerConnection.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/Connections/ServerConnection.cpp.s
 .PHONY : Connections/ServerConnection.cpp.s
 
-HttpParser/HttpParser.o: HttpParser/HttpParser.c.o
-.PHONY : HttpParser/HttpParser.o
-
-# target to build an object file
-HttpParser/HttpParser.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o
-.PHONY : HttpParser/HttpParser.c.o
-
-HttpParser/HttpParser.i: HttpParser/HttpParser.c.i
-.PHONY : HttpParser/HttpParser.i
-
-# target to preprocess a source file
-HttpParser/HttpParser.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.i
-.PHONY : HttpParser/HttpParser.c.i
-
-HttpParser/HttpParser.s: HttpParser/HttpParser.c.s
-.PHONY : HttpParser/HttpParser.s
-
-# target to generate assembly for a file
-HttpParser/HttpParser.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.s
-.PHONY : HttpParser/HttpParser.c.s
-
 Proxy.o: Proxy.cpp.o
 .PHONY : Proxy.o
 
@@ -291,9 +267,6 @@ help:
 	@echo "... Connections/ServerConnection.o"
 	@echo "... Connections/ServerConnection.i"
 	@echo "... Connections/ServerConnection.s"
-	@echo "... HttpParser/HttpParser.o"
-	@echo "... HttpParser/HttpParser.i"
-	@echo "... HttpParser/HttpParser.s"
 	@echo "... Proxy.o"
 	@echo "... Proxy.i"
 	@echo "... Proxy.s"

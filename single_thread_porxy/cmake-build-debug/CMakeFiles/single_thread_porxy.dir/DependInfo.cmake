@@ -4,18 +4,9 @@ set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
 
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
-  "C"
   "CXX"
   )
 # The set of files for implicit dependencies of each language:
-set(CMAKE_DEPENDS_CHECK_C
-  "/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/HttpParser.c" "/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles/single_thread_porxy.dir/HttpParser/HttpParser.c.o"
-  )
-set(CMAKE_C_COMPILER_ID "GNU")
-
-# The include file search paths:
-set(CMAKE_C_TARGET_INCLUDE_PATH
-  )
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.cpp" "/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles/single_thread_porxy.dir/Cache/Cache.cpp.o"
   "/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.cpp" "/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles/single_thread_porxy.dir/Connections/ClientConnection.cpp.o"

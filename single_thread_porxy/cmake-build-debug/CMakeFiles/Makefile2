@@ -81,12 +81,12 @@ clean: CMakeFiles/single_thread_porxy.dir/clean
 CMakeFiles/single_thread_porxy.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/single_thread_porxy.dir/build.make CMakeFiles/single_thread_porxy.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target single_thread_porxy"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target single_thread_porxy"
 .PHONY : CMakeFiles/single_thread_porxy.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/single_thread_porxy.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/single_thread_porxy.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yevsyukof/CLionProjects/single_thread_porxy/cmake-build-debug/CMakeFiles 0
 .PHONY : CMakeFiles/single_thread_porxy.dir/rule
