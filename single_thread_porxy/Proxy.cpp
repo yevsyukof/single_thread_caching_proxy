@@ -93,6 +93,9 @@ void Proxy::run() {
             acceptNewConnection();
         }
 
+        std::cout << "\nNEW POLL CYCLE\n" << std::endl;
+        std::flush(std::cout);
+
         updateClientsConnections(); // TODO
         updateServersConnections();
     }
@@ -144,9 +147,7 @@ void Proxy::updateClientsConnections() {
             continue;
         }
 
-        if (isReadyForRead(clientConnection->getInPollListIdx())) { // можем принять данные из клиентск.
-//            std::cout << "isReadyForRead(): client sedning info to us................................." << std::endl;
-
+        if (isReadyForRead(clientConnection->getInPollListIdx())) {
             if (clientConnection->receiveRequest()) {
                 if (clientConnection->getState() != ClientConnectionStates::CONNECTION_ERROR) {
                     handleArrivalOfClientRequest(clientConnection);
@@ -157,8 +158,7 @@ void Proxy::updateClientsConnections() {
                 }
             }
         } else if (isReadyForWrite(clientConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
-            std::cout << "isReadyForWrite(): client WAITING for ifoo................................." << std::endl;
-
+            std::cout << "isReadyForWrite(): client ReadyFroWrite" << std::endl;
 
             if (clientConnection->sendAnswer()) {
                 shutdownClientConnection(clientConnection);
@@ -297,7 +297,8 @@ void Proxy::updateServersConnections() {
             continue;
         }
 
-        if (isReadyForWrite(serverConnection->getInPollListIdx())) { // будем считать что они взаимоисключаемы
+        if (isReadyForWrite(serverConnection->getInPollListIdx())) {
+            // будем считать что они взаимоисключаемы
             if (serverConnection->sendRequest()) {
                 if (serverConnection->getState() == ServerConnectionState::RECEIVING_ANSWER) {
                     // инициализируем принятие ответа от вышестоящего сервера
@@ -310,8 +311,6 @@ void Proxy::updateServersConnections() {
                 }
             }
         } else if (isReadyForRead(serverConnection->getInPollListIdx())) { // можем принять данные
-            std::cout << "SERVER CON ZHDET OTVET" << std::endl;
-
             if (serverConnection->receiveAnswer()) {
                 shutdownServerConnection(serverConnection);
                 iterator = serversConnections.erase(iterator);

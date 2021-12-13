@@ -5,9 +5,9 @@
 #ifndef SINGLE_THREAD_PORXY_CONSTANTS_H
 #define SINGLE_THREAD_PORXY_CONSTANTS_H
 
-constexpr static int CONNECTION_CHECK_DELAY = 10000;
+//constexpr static int CONNECTION_CHECK_DELAY = 10000;
 
-constexpr static int MAX_CONNECTION_NUM = SOMAXCONN;
+constexpr static int MAX_CONNECTION_NUM = 1024; /// ограничение poll(), с большим кол-вом просто не запускается
 
 constexpr static int IGNORED_SOCKET_FD_VAL = -1; // игнорируется pool при опросе
 

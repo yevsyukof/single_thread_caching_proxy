@@ -5,6 +5,7 @@
 #ifndef SINGLE_THREAD_PORXY_CACHEENTRY_H
 #define SINGLE_THREAD_PORXY_CACHEENTRY_H
 
+#include <utility>
 #include <vector>
 #include <memory>
 
@@ -16,7 +17,7 @@ public:
         data = entryData;
     }
 
-    const std::shared_ptr<std::vector<char>>& getCacheEntryData() const {
+    const std::shared_ptr<std::vector<char>> &getCacheEntryData() const {
         return data;
     }
 

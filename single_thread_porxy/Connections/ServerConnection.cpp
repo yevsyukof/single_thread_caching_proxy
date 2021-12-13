@@ -5,7 +5,7 @@
 
 #include "../HttpParser/httpresponseparser.h"
 
-#define RECV_BUF_SIZE 16536
+#define RECV_BUF_SIZE 16384
 
 #define NOT_FULL_SEND_REQUEST 0
 #define FULL_SEND_REQUEST 1
@@ -22,11 +22,11 @@ ServerConnection::ServerConnection(int connectionSocketFd, int inPollListIdx,
           processedRequestForServer(std::move(processedRequestForServer)),
           sendRequestOffset(0), connectionState(ServerConnectionState::SENDING_REQUEST) {
     this->requestUrl = requestUrl;
-    // TODO если что move проверить, да и вообще это указатель на память, выделенную ss.str()
+//    recvBuf->reserve(10000); /// test
 }
 
 int ServerConnection::sendRequest() {
-    std::cout << "SERVER SEND REQUEST TO SERVER" << std::endl;
+    std::cout << "ServerConnection::sendRequest(): iteration" << std::endl;
 
     int sendCount;
     if ((sendCount = send(connectionSocketFd,
@@ -39,7 +39,7 @@ int ServerConnection::sendRequest() {
         if (sendRequestOffset == processedRequestForServer->length()) {
             connectionState = ServerConnectionState::RECEIVING_ANSWER;
 
-            std::cout << "REQ DOST NA SERVER SYKA" << std::endl;
+            std::cout << "ServerConnection::sendRequest(): done" << std::endl;
 
             return FULL_SEND_REQUEST;
         } else {
@@ -60,6 +60,8 @@ bool isResponseStatusIs200(const std::shared_ptr<std::vector<char>> &recvBuf) { 
 }
 
 int ServerConnection::receiveAnswer() {
+    std::cout << "ServerConnection::receiveAnswer(): iteration" << std::endl;
+
     char buf[RECV_BUF_SIZE];
     ssize_t recvCount;
 
@@ -67,6 +69,9 @@ int ServerConnection::receiveAnswer() {
         std::cout << "\n----------------RECEIVE FROM SERVER SOCKET ERROR----------------\n" << std::endl;
         return SOCKET_RECEIVE_ERROR;
     } else if (recvCount > 0) {
+        std::cout << "ServerConnection::receiveAnswer(): recv() unblock" << std::endl;
+
+
         recvBuf->insert(recvBuf->end(), buf, buf + recvCount);
         connectionState = ServerConnectionState::RECEIVING_ANSWER;
         return NOT_FULL_RECEIVE_ANSWER;

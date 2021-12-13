@@ -35,13 +35,13 @@ void ClientConnection::parseRequestAndCheckValidity() {
         std::cout << "**************** end request ****************" << std::endl;
     }
 
-    if (clientHttpRequest.versionMajor != 1 || clientHttpRequest.versionMinor != 0) {
-        std::cout << "--------WRONG HTTP VERSION--------" << std::endl;
-
-        connectionState = ClientConnectionStates::WRONG_REQUEST;
-        requestValidatorState = ClientRequestErrors::ERROR_505;
-        return;
-    }
+//    if (clientHttpRequest.versionMajor != 1 || clientHttpRequest.versionMinor != 0) {
+//        std::cout << "--------WRONG HTTP VERSION--------" << std::endl;
+//
+//        connectionState = ClientConnectionStates::WRONG_REQUEST;
+//        requestValidatorState = ClientRequestErrors::ERROR_505;
+//        return;
+//    }
 
 
     if (clientHttpRequest.method != "GET" && clientHttpRequest.method != "HEAD") {

@@ -54,8 +54,6 @@ private:
 
     void handleArrivalOfClientRequest(const std::shared_ptr<ClientConnection> &clientConnection);
 
-//    void handleArrivalOfServerResponse(const std::shared_ptr<ClientConnection> &clientConnection);
-
     int resolveRequiredHost(const std::string &host) const;
 
     void updateServersConnections();

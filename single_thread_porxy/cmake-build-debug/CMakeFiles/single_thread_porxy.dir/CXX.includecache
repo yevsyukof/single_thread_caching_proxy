@@ -6,10 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.cpp
-Cache.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
-
 /home/yevsyukof/CLionProjects/single_thread_porxy/Cache/Cache.h
 map
 -
@@ -17,22 +13,18 @@ string
 -
 memory
 -
+utility
+-
 CacheEntry.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Cache/CacheEntry.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Cache/CacheEntry.h
+utility
+-
 vector
 -
 memory
 -
-
-/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.cpp
-string
--
-iostream
--
-ClientConnection.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 Connection.h
@@ -56,18 +48,6 @@ unistd.h
 sys/socket.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/sys/socket.h
 
-/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.cpp
-iostream
--
-utility
--
-sys/socket.h
--
-ServerConnection.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
-../HttpParser/httpresponseparser.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httpresponseparser.h
-
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
 Connection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/Connection.h
@@ -84,25 +64,7 @@ cstdlib
 request.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/request.h
 
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/httpresponseparser.h
-algorithm
--
-cstring
--
-cstdlib
--
-response.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/response.h
-
 /home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/request.h
-string
--
-vector
--
-sstream
--
-
-/home/yevsyukof/CLionProjects/single_thread_porxy/HttpParser/response.h
 string
 -
 vector
@@ -151,16 +113,4 @@ Connections/ClientConnection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ClientConnection.h
 Connections/ServerConnection.h
 /home/yevsyukof/CLionProjects/single_thread_porxy/Connections/ServerConnection.h
-
-/home/yevsyukof/CLionProjects/single_thread_porxy/main.cpp
-iostream
--
-csignal
--
-memory.h
--
-sys/poll.h
--
-Proxy.h
-/home/yevsyukof/CLionProjects/single_thread_porxy/Proxy.h
 

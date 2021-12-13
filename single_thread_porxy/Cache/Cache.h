@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <utility>
 #include "CacheEntry.h"
 
 
@@ -14,12 +15,11 @@ public:
     }
 
     void addCacheEntry(const std::string &url,
-                       const std::shared_ptr<std::vector<char>> &entryData) {
+                       const std::shared_ptr<std::vector<char>>& entryData) {
         urlToCacheEntry[url] = CacheEntry(entryData);
     }
 
     const CacheEntry& getCacheEntry(const std::string &url) const {
-//        return urlToCacheEntry[url];
         return urlToCacheEntry.at(url); // TODO
     }
 
